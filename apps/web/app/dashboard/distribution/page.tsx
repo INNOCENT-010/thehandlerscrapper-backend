@@ -104,6 +104,155 @@ function broadcastStatusClasses(status: string) {
   }
 }
 
+function Icon({
+  name,
+  size = 18,
+}: {
+  name:
+    | 'search'
+    | 'users'
+    | 'mail'
+    | 'phone'
+    | 'filter'
+    | 'chevron'
+    | 'arrow'
+    | 'check'
+    | 'refresh'
+    | 'send'
+    | 'clock'
+    | 'location'
+    | 'spark'
+    | 'close'
+  size?: number
+}) {
+  const common = {
+    width: size,
+    height: size,
+    viewBox: '0 0 24 24',
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 1.8,
+    strokeLinecap: 'round' as const,
+    strokeLinejoin: 'round' as const,
+  }
+
+  switch (name) {
+    case 'search':
+      return (
+        <svg {...common}>
+          <circle cx="11" cy="11" r="7" />
+          <path d="m20 20-4-4" />
+        </svg>
+      )
+
+    case 'users':
+      return (
+        <svg {...common}>
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+        </svg>
+      )
+
+    case 'mail':
+      return (
+        <svg {...common}>
+          <rect x="3" y="5" width="18" height="14" rx="2" />
+          <path d="m3 7 9 6 9-6" />
+        </svg>
+      )
+
+    case 'phone':
+      return (
+        <svg {...common}>
+          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.9.33 1.78.62 2.63a2 2 0 0 1-.45 2.11L8 9.73a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.85.29 1.73.5 2.63.62A2 2 0 0 1 22 16.92Z" />
+        </svg>
+      )
+
+    case 'filter':
+      return (
+        <svg {...common}>
+          <path d="M4 6h16" />
+          <path d="M7 12h10" />
+          <path d="M10 18h4" />
+        </svg>
+      )
+
+    case 'chevron':
+      return (
+        <svg {...common}>
+          <path d="m6 9 6 6 6-6" />
+        </svg>
+      )
+
+    case 'arrow':
+      return (
+        <svg {...common}>
+          <path d="M5 12h14" />
+          <path d="m13 6 6 6-6 6" />
+        </svg>
+      )
+
+    case 'check':
+      return (
+        <svg {...common}>
+          <path d="m5 12 4 4L19 6" />
+        </svg>
+      )
+
+    case 'refresh':
+      return (
+        <svg {...common}>
+          <path d="M20 11a8.1 8.1 0 0 0-15.5-3" />
+          <path d="M4 4v4h4" />
+          <path d="M4 13a8.1 8.1 0 0 0 15.5 3" />
+          <path d="M20 20v-4h-4" />
+        </svg>
+      )
+
+    case 'send':
+      return (
+        <svg {...common}>
+          <path d="m22 2-7 20-4-9-9-4Z" />
+          <path d="M22 2 11 13" />
+        </svg>
+      )
+
+    case 'clock':
+      return (
+        <svg {...common}>
+          <circle cx="12" cy="12" r="9" />
+          <path d="M12 7v5l3 2" />
+        </svg>
+      )
+
+    case 'location':
+      return (
+        <svg {...common}>
+          <path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z" />
+          <circle cx="12" cy="10" r="2.5" />
+        </svg>
+      )
+
+    case 'spark':
+      return (
+        <svg {...common}>
+          <path d="m12 3 1.6 5.4L19 10l-5.4 1.6L12 17l-1.6-5.4L5 10l5.4-1.6Z" />
+          <path d="m19 16 .7 2.3L22 19l-2.3.7L19 22l-.7-2.3L16 19l2.3-.7Z" />
+        </svg>
+      )
+
+    case 'close':
+      return (
+        <svg {...common}>
+          <path d="m6 6 12 12" />
+          <path d="m18 6-12 12" />
+        </svg>
+      )
+  }
+}
+
 export default function DistributionPage() {
   const [states, setStates] = useState<Location[]>([])
   const [lgas, setLgas] = useState<Location[]>([])
@@ -258,10 +407,7 @@ export default function DistributionPage() {
   }, [lgaId])
 
   useEffect(() => {
-    const timer = setTimeout(
-      loadAudience,
-      250
-    )
+    const timer = setTimeout(loadAudience, 250)
 
     return () => clearTimeout(timer)
   }, [loadAudience])
@@ -269,22 +415,17 @@ export default function DistributionPage() {
   useEffect(() => {
     setSelected((current) => {
       const visible = new Set(
-        audience.schools.map(
-          (school) => school.id
-        )
+        audience.schools.map((school) => school.id)
       )
 
       return new Set(
-        [...current].filter((id) =>
-          visible.has(id)
-        )
+        [...current].filter((id) => visible.has(id))
       )
     })
   }, [audience.schools])
 
   const selectedSchools = audience.schools.filter(
-    (school) =>
-      selected.has(school.id)
+    (school) => selected.has(school.id)
   )
 
   const allSelected =
@@ -319,14 +460,10 @@ export default function DistributionPage() {
 
   function toggleAll() {
     setSelected((current) => {
-      if (allSelected) {
-        return new Set()
-      }
+      if (allSelected) return new Set()
 
       return new Set(
-        audience.schools.map(
-          (school) => school.id
-        )
+        audience.schools.map((school) => school.id)
       )
     })
   }
@@ -337,12 +474,10 @@ export default function DistributionPage() {
     setCityId('')
     setStatus('')
     setSearch('')
-
     setLeadOnly(false)
     setHasEmail(true)
     setHasPhone(false)
     setFreshOnly(false)
-
     setSelected(new Set())
   }
 
@@ -365,23 +500,17 @@ export default function DistributionPage() {
 
   async function queueBroadcast() {
     if (!selected.size) {
-      setMessage(
-        'Select at least one recipient.'
-      )
+      setMessage('Select at least one recipient.')
       return
     }
 
     if (!subject.trim()) {
-      setMessage(
-        'Enter a campaign subject.'
-      )
+      setMessage('Enter a campaign subject.')
       return
     }
 
     if (!body.trim()) {
-      setMessage(
-        'Enter an email message.'
-      )
+      setMessage('Enter an email message.')
       return
     }
 
@@ -412,19 +541,14 @@ export default function DistributionPage() {
         {
           method: 'POST',
           headers: {
-            'Content-Type':
-              'application/json',
+            'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            school_ids: [
-              ...selected,
-            ],
-            subject:
-              subject.trim(),
+            school_ids: [...selected],
+            subject: subject.trim(),
             body_html: body,
             sender_name:
-              senderName.trim() ||
-              'TheHandler',
+              senderName.trim() || 'TheHandler',
           }),
         }
       )
@@ -433,8 +557,7 @@ export default function DistributionPage() {
 
       if (!response.ok) {
         throw new Error(
-          data.error ||
-            'Failed to queue broadcast'
+          data.error || 'Failed to queue broadcast'
         )
       }
 
@@ -481,188 +604,152 @@ export default function DistributionPage() {
     )
     .replaceAll(
       '{{status}}',
-      selectedSchools[0]?.status ||
-        'NEW'
+      selectedSchools[0]?.status || 'NEW'
     )
+
+  const deliveryRate = history.reduce(
+    (total, campaign) =>
+      total + campaign.sent_count,
+    0
+  )
 
   return (
     <main className="min-h-screen bg-[#f6f7f9] text-slate-950">
-      <div className="mx-auto max-w-[1700px] p-4 sm:p-6 lg:p-8">
+      <div className="mx-auto max-w-[1680px] px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
 
-        {/* HEADER */}
+        {/* TOP HEADER */}
 
-        <header className="mb-6 overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-sm">
+        <header className="mb-6">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
 
-          <div className="border-b border-slate-100 px-5 py-6 sm:px-7">
+            <div>
+              <div className="mb-3 flex items-center gap-2">
+                <span className="inline-flex items-center rounded-full bg-slate-950 px-2.5 py-1 text-[9px] font-bold tracking-[0.18em] text-white">
+                  THEHANDLER
+                </span>
 
-            <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
-
-              <div>
-                <div className="mb-3 flex items-center gap-2">
-                  <span className="rounded-full bg-slate-900 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-white">
-                    THEHANDLER
-                  </span>
-
-                  <span className="text-xs text-slate-400">
-                    Marketing
-                  </span>
-                </div>
-
-                <h1 className="text-3xl font-semibold tracking-[-0.03em] sm:text-4xl">
-                  Distribution
-                </h1>
-
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-                  Turn your school database into targeted
-                  audiences and campaigns.
-                </p>
+                <span className="text-xs text-slate-400">
+                  / Distribution
+                </span>
               </div>
 
-              <div className="flex rounded-xl bg-slate-100 p-1">
+              <h1 className="text-[32px] font-semibold tracking-[-0.045em] sm:text-[40px]">
+                Distribution
+              </h1>
 
-                <button
-                  onClick={() =>
-                    setTab('audience')
-                  }
-                  className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
-                    tab === 'audience'
-                      ? 'bg-white text-slate-950 shadow-sm'
-                      : 'text-slate-500 hover:text-slate-900'
-                  }`}
-                >
-                  Audience
-                </button>
-
-                <button
-                  onClick={() =>
-                    setTab('composer')
-                  }
-                  className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
-                    tab === 'composer'
-                      ? 'bg-white text-slate-950 shadow-sm'
-                      : 'text-slate-500 hover:text-slate-900'
-                  }`}
-                >
-                  Broadcast
-
-                  {selected.size > 0 && (
-                    <span className="ml-2 rounded-full bg-slate-900 px-1.5 py-0.5 text-[10px] text-white">
-                      {selected.size}
-                    </span>
-                  )}
-                </button>
-
-                <button
-                  onClick={async () => {
-                    await loadHistory()
-                    setTab('history')
-                  }}
-                  className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
-                    tab === 'history'
-                      ? 'bg-white text-slate-950 shadow-sm'
-                      : 'text-slate-500 hover:text-slate-900'
-                  }`}
-                >
-                  History
-                </button>
-
-              </div>
-
+              <p className="mt-2 max-w-xl text-sm leading-6 text-slate-500">
+                Find the right schools, build a targeted
+                audience, and send professional campaigns
+                without leaving your workspace.
+              </p>
             </div>
 
+            <div className="flex items-center gap-2">
+              <div className="hidden rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 shadow-sm sm:flex sm:items-center sm:gap-2">
+                <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                <span className="text-xs font-medium text-slate-600">
+                  Distribution ready
+                </span>
+              </div>
+
+              <button
+                onClick={async () => {
+                  await loadHistory()
+                  setTab('history')
+                }}
+                className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold shadow-sm transition hover:bg-slate-50"
+              >
+                View history
+              </button>
+            </div>
           </div>
-
-          {/* METRICS */}
-
-          <div className="grid grid-cols-2 divide-x divide-y border-slate-100 sm:grid-cols-3 lg:grid-cols-5 lg:divide-y-0">
-
-            <div className="px-5 py-4">
-              <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">
-                Audience
-              </div>
-
-              <div className="mt-1 text-2xl font-semibold">
-                {audience.total.toLocaleString()}
-              </div>
-
-              <div className="mt-0.5 text-xs text-slate-400">
-                schools
-              </div>
-            </div>
-
-            <div className="px-5 py-4">
-              <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">
-                Reachable
-              </div>
-
-              <div className="mt-1 text-2xl font-semibold">
-                {audience.email_count.toLocaleString()}
-              </div>
-
-              <div className="mt-0.5 text-xs text-slate-400">
-                email addresses
-              </div>
-            </div>
-
-            <div className="px-5 py-4">
-              <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">
-                Leads
-              </div>
-
-              <div className="mt-1 text-2xl font-semibold">
-                {audience.lead_count.toLocaleString()}
-              </div>
-
-              <div className="mt-0.5 text-xs text-slate-400">
-                active opportunities
-              </div>
-            </div>
-
-            <div className="px-5 py-4">
-              <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">
-                Fresh
-              </div>
-
-              <div className="mt-1 text-2xl font-semibold">
-                {audience.fresh_count.toLocaleString()}
-              </div>
-
-              <div className="mt-0.5 text-xs text-slate-400">
-                recently discovered
-              </div>
-            </div>
-
-            <div className="px-5 py-4">
-              <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">
-                Selected
-              </div>
-
-              <div className="mt-1 text-2xl font-semibold">
-                {selected.size.toLocaleString()}
-              </div>
-
-              <div className="mt-0.5 text-xs text-slate-400">
-                campaign recipients
-              </div>
-            </div>
-
-          </div>
-
         </header>
+
+        {/* WORKFLOW NAV */}
+
+        <div className="mb-5 overflow-x-auto">
+          <div className="flex min-w-max items-center gap-1 rounded-2xl border border-slate-200 bg-white p-1.5 shadow-sm">
+
+            <button
+              onClick={() => setTab('audience')}
+              className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold transition ${
+                tab === 'audience'
+                  ? 'bg-slate-950 text-white shadow-sm'
+                  : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+              }`}
+            >
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/10 text-[10px]">
+                1
+              </span>
+              Build audience
+              {selected.size > 0 && (
+                <span
+                  className={`rounded-full px-2 py-0.5 text-[9px] ${
+                    tab === 'audience'
+                      ? 'bg-white/15 text-white'
+                      : 'bg-slate-100 text-slate-600'
+                  }`}
+                >
+                  {selected.size}
+                </span>
+              )}
+            </button>
+
+            <div className="hidden h-5 w-px bg-slate-200 sm:block" />
+
+            <button
+              onClick={() => setTab('composer')}
+              className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold transition ${
+                tab === 'composer'
+                  ? 'bg-slate-950 text-white shadow-sm'
+                  : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+              }`}
+            >
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/10 text-[10px]">
+                2
+              </span>
+              Compose email
+            </button>
+
+            <div className="hidden h-5 w-px bg-slate-200 sm:block" />
+
+            <button
+              onClick={async () => {
+                await loadHistory()
+                setTab('history')
+              }}
+              className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold transition ${
+                tab === 'history'
+                  ? 'bg-slate-950 text-white shadow-sm'
+                  : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+              }`}
+            >
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/10 text-[10px]">
+                3
+              </span>
+              History
+            </button>
+          </div>
+        </div>
 
         {/* MESSAGE */}
 
         {message && (
-          <div className="mb-5 flex items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm shadow-sm">
-            <span>{message}</span>
+          <div className="mb-5 flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-sm shadow-sm">
+            <div className="flex items-center gap-3">
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-slate-600">
+                <Icon name="check" size={15} />
+              </span>
+              <span className="text-slate-700">
+                {message}
+              </span>
+            </div>
 
             <button
-              onClick={() =>
-                setMessage('')
-              }
-              className="ml-4 text-slate-400 hover:text-slate-900"
+              onClick={() => setMessage('')}
+              className="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-900"
             >
-              ×
+              <Icon name="close" size={15} />
             </button>
           </div>
         )}
@@ -670,430 +757,479 @@ export default function DistributionPage() {
         {/* AUDIENCE */}
 
         {tab === 'audience' && (
-          <section className="grid gap-5 xl:grid-cols-[300px_minmax(0,1fr)]">
+          <>
+            {/* METRIC STRIP */}
 
-            {/* FILTER PANEL */}
+            <div className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-5">
 
-            <aside className="h-fit rounded-[22px] border border-slate-200 bg-white shadow-sm">
-
-              <div className="border-b border-slate-100 px-5 py-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="font-semibold">
-                      Build audience
-                    </h2>
-
-                    <p className="mt-0.5 text-xs text-slate-400">
-                      Target schools precisely
-                    </p>
-                  </div>
-
-                  {activeFilterCount > 0 && (
-                    <span className="rounded-full bg-slate-900 px-2 py-1 text-[10px] font-semibold text-white">
-                      {activeFilterCount}
+              {[
+                {
+                  label: 'Audience',
+                  value: audience.total,
+                  detail: 'schools found',
+                  icon: 'users' as const,
+                },
+                {
+                  label: 'Reachable',
+                  value: audience.email_count,
+                  detail: 'with email',
+                  icon: 'mail' as const,
+                },
+                {
+                  label: 'Leads',
+                  value: audience.lead_count,
+                  detail: 'active opportunities',
+                  icon: 'spark' as const,
+                },
+                {
+                  label: 'Fresh',
+                  value: audience.fresh_count,
+                  detail: 'recent discoveries',
+                  icon: 'clock' as const,
+                },
+                {
+                  label: 'Selected',
+                  value: selected.size,
+                  detail: 'campaign recipients',
+                  icon: 'check' as const,
+                },
+              ].map((metric) => (
+                <div
+                  key={metric.label}
+                  className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                      {metric.label}
                     </span>
-                  )}
-                </div>
-              </div>
 
-              <div className="space-y-5 p-5">
+                    <span className="text-slate-300">
+                      <Icon name={metric.icon} size={15} />
+                    </span>
+                  </div>
 
-                {/* SEARCH */}
+                  <div className="mt-3 text-[25px] font-semibold tracking-tight">
+                    {metric.value.toLocaleString()}
+                  </div>
 
-                <div>
-                  <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
-                    Search
-                  </label>
-
-                  <div className="relative">
-                    <input
-                      value={search}
-                      onChange={(event) =>
-                        setSearch(
-                          event.target.value
-                        )
-                      }
-                      placeholder="School, email or phone"
-                      className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:bg-white"
-                    />
+                  <div className="mt-0.5 text-[11px] text-slate-400">
+                    {metric.detail}
                   </div>
                 </div>
+              ))}
+            </div>
 
-                {/* LOCATION */}
+            <section className="grid gap-5 xl:grid-cols-[290px_minmax(0,1fr)]">
 
-                <div>
-                  <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
-                    Location
-                  </label>
+              {/* FILTERS */}
 
-                  <div className="space-y-2">
+              <aside className="h-fit overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
 
-                    <select
-                      value={stateId}
-                      onChange={(event) =>
-                        setStateId(
-                          event.target.value
-                        )
-                      }
-                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none"
-                    >
-                      <option value="">
-                        All states
-                      </option>
+                <div className="border-b border-slate-100 px-5 py-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-950 text-white">
+                        <Icon name="filter" size={15} />
+                      </span>
 
-                      {states.map((state) => (
-                        <option
-                          key={state.id}
-                          value={state.id}
-                        >
-                          {state.name}
-                        </option>
-                      ))}
-                    </select>
+                      <div>
+                        <h2 className="text-sm font-semibold">
+                          Audience filters
+                        </h2>
+                        <p className="text-[11px] text-slate-400">
+                          Refine your recipients
+                        </p>
+                      </div>
+                    </div>
 
-                    <select
-                      value={lgaId}
-                      disabled={!stateId}
-                      onChange={(event) =>
-                        setLgaId(
-                          event.target.value
-                        )
-                      }
-                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none disabled:bg-slate-50 disabled:text-slate-400"
-                    >
-                      <option value="">
-                        All LGAs
-                      </option>
-
-                      {lgas.map((lga) => (
-                        <option
-                          key={lga.id}
-                          value={lga.id}
-                        >
-                          {lga.name}
-                        </option>
-                      ))}
-                    </select>
-
-                    <select
-                      value={cityId}
-                      disabled={!lgaId}
-                      onChange={(event) =>
-                        setCityId(
-                          event.target.value
-                        )
-                      }
-                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none disabled:bg-slate-50 disabled:text-slate-400"
-                    >
-                      <option value="">
-                        All cities / towns
-                      </option>
-
-                      {cities.map((city) => (
-                        <option
-                          key={city.id}
-                          value={city.id}
-                        >
-                          {city.name}
-                        </option>
-                      ))}
-                    </select>
-
-                  </div>
-                </div>
-
-                {/* SALES */}
-
-                <div>
-                  <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
-                    Sales
-                  </label>
-
-                  <select
-                    value={status}
-                    onChange={(event) =>
-                      setStatus(
-                        event.target.value
-                      )
-                    }
-                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none"
-                  >
-                    <option value="">
-                      Any status
-                    </option>
-
-                    {STATUSES.map(
-                      (item) => (
-                        <option
-                          key={item}
-                          value={item}
-                        >
-                          {formatStatus(item)}
-                        </option>
-                      )
+                    {activeFilterCount > 0 && (
+                      <span className="rounded-full bg-slate-950 px-2 py-1 text-[9px] font-bold text-white">
+                        {activeFilterCount}
+                      </span>
                     )}
-                  </select>
+                  </div>
                 </div>
 
-                {/* SMART FILTERS */}
+                <div className="space-y-5 p-5">
 
-                <div>
-                  <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
-                    Smart filters
-                  </label>
+                  {/* SEARCH */}
 
-                  <div className="space-y-1 rounded-xl border border-slate-200 p-1">
+                  <div>
+                    <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                      Search
+                    </label>
 
-                    {[
-                      [
-                        'Leads only',
-                        leadOnly,
-                        setLeadOnly,
-                      ],
-                      [
-                        'Has email',
-                        hasEmail,
-                        setHasEmail,
-                      ],
-                      [
-                        'Has phone',
-                        hasPhone,
-                        setHasPhone,
-                      ],
-                      [
-                        'Fresh discovery',
-                        freshOnly,
-                        setFreshOnly,
-                      ],
-                    ].map(
-                      ([
-                        label,
-                        value,
-                        setter,
-                      ]) => (
+                    <div className="relative">
+                      <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
+                        <Icon name="search" size={15} />
+                      </span>
+
+                      <input
+                        value={search}
+                        onChange={(event) =>
+                          setSearch(event.target.value)
+                        }
+                        placeholder="School, email or phone"
+                        className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-3 text-xs outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:bg-white"
+                      />
+                    </div>
+                  </div>
+
+                  {/* LOCATION */}
+
+                  <div>
+                    <div className="mb-2 flex items-center gap-1.5">
+                      <span className="text-slate-400">
+                        <Icon name="location" size={13} />
+                      </span>
+
+                      <label className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                        Location
+                      </label>
+                    </div>
+
+                    <div className="space-y-2">
+
+                      {[
+                        {
+                          value: stateId,
+                          setter: setStateId,
+                          placeholder: 'All states',
+                          options: states,
+                        },
+                        {
+                          value: lgaId,
+                          setter: setLgaId,
+                          placeholder: 'All LGAs',
+                          options: lgas,
+                          disabled: !stateId,
+                        },
+                        {
+                          value: cityId,
+                          setter: setCityId,
+                          placeholder: 'All cities / towns',
+                          options: cities,
+                          disabled: !lgaId,
+                        },
+                      ].map((item, index) => (
+                        <div
+                          key={item.placeholder}
+                          className="relative"
+                        >
+                          <select
+                            value={item.value}
+                            disabled={item.disabled}
+                            onChange={(event) =>
+                              item.setter(event.target.value)
+                            }
+                            className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-3.5 py-3 pr-9 text-xs font-medium text-slate-700 outline-none transition focus:border-slate-400 disabled:bg-slate-50 disabled:text-slate-400"
+                          >
+                            <option value="">
+                              {item.placeholder}
+                            </option>
+
+                            {item.options.map((option) => (
+                              <option
+                                key={option.id}
+                                value={option.id}
+                              >
+                                {option.name}
+                              </option>
+                            ))}
+                          </select>
+
+                          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
+                            <Icon name="chevron" size={14} />
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* STATUS */}
+
+                  <div>
+                    <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                      Sales status
+                    </label>
+
+                    <div className="relative">
+                      <select
+                        value={status}
+                        onChange={(event) =>
+                          setStatus(event.target.value)
+                        }
+                        className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-3.5 py-3 pr-9 text-xs font-medium text-slate-700 outline-none focus:border-slate-400"
+                      >
+                        <option value="">
+                          Any status
+                        </option>
+
+                        {STATUSES.map((item) => (
+                          <option key={item} value={item}>
+                            {formatStatus(item)}
+                          </option>
+                        ))}
+                      </select>
+
+                      <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
+                        <Icon name="chevron" size={14} />
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* SMART FILTERS */}
+
+                  <div>
+                    <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                      Smart filters
+                    </label>
+
+                    <div className="overflow-hidden rounded-xl border border-slate-200">
+
+                      {[
+                        {
+                          label: 'Leads only',
+                          description: 'Prioritize opportunities',
+                          value: leadOnly,
+                          setter: setLeadOnly,
+                        },
+                        {
+                          label: 'Has email',
+                          description: 'Reachable by email',
+                          value: hasEmail,
+                          setter: setHasEmail,
+                        },
+                        {
+                          label: 'Has phone',
+                          description: 'Has a contact number',
+                          value: hasPhone,
+                          setter: setHasPhone,
+                        },
+                        {
+                          label: 'Fresh discovery',
+                          description: 'Recently discovered',
+                          value: freshOnly,
+                          setter: setFreshOnly,
+                        },
+                      ].map((item) => (
                         <label
-                          key={
-                            label as string
-                          }
-                          className={`flex cursor-pointer items-center justify-between rounded-lg px-3 py-2.5 text-sm transition ${
-                            value
-                              ? 'bg-slate-100 font-medium'
-                              : 'hover:bg-slate-50'
+                          key={item.label}
+                          className={`flex cursor-pointer items-center justify-between border-b border-slate-100 px-3.5 py-3 last:border-0 ${
+                            item.value
+                              ? 'bg-slate-50'
+                              : 'bg-white hover:bg-slate-50/60'
                           }`}
                         >
-                          <span>
-                            {label as string}
+                          <div>
+                            <div className="text-xs font-medium text-slate-700">
+                              {item.label}
+                            </div>
+                            <div className="mt-0.5 text-[10px] text-slate-400">
+                              {item.description}
+                            </div>
+                          </div>
+
+                          <span
+                            className={`relative h-5 w-9 rounded-full transition ${
+                              item.value
+                                ? 'bg-slate-950'
+                                : 'bg-slate-200'
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={item.value}
+                              onChange={(event) =>
+                                item.setter(
+                                  event.target.checked
+                                )
+                              }
+                              className="sr-only"
+                            />
+
+                            <span
+                              className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition ${
+                                item.value
+                                  ? 'left-[18px]'
+                                  : 'left-0.5'
+                              }`}
+                            />
                           </span>
-
-                          <input
-                            type="checkbox"
-                            checked={
-                              value as boolean
-                            }
-                            onChange={(
-                              event
-                            ) =>
-                              (
-                                setter as (
-                                  value: boolean
-                                ) => void
-                              )(
-                                event.target
-                                  .checked
-                              )
-                            }
-                            className="h-4 w-4"
-                          />
                         </label>
-                      )
-                    )}
+                      ))}
 
-                  </div>
-                </div>
-
-                <button
-                  onClick={clearFilters}
-                  className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-xs font-medium text-slate-500 transition hover:bg-slate-50 hover:text-slate-900"
-                >
-                  Reset audience
-                </button>
-
-              </div>
-
-            </aside>
-
-            {/* AUDIENCE TABLE */}
-
-            <section className="min-w-0 rounded-[22px] border border-slate-200 bg-white shadow-sm">
-
-              <div className="border-b border-slate-100 p-5 sm:p-6">
-
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h2 className="text-lg font-semibold">
-                        Schools
-                      </h2>
-
-                      {loading && (
-                        <span className="text-xs text-slate-400">
-                          Updating…
-                        </span>
-                      )}
                     </div>
-
-                    <p className="mt-1 text-xs text-slate-400">
-                      Select schools to include in your next campaign.
-                    </p>
                   </div>
 
-                  <div className="flex flex-wrap gap-2">
-
-                    <button
-                      onClick={toggleAll}
-                      disabled={
-                        !audience.schools.length
-                      }
-                      className="rounded-xl border border-slate-200 px-3.5 py-2 text-xs font-semibold transition hover:bg-slate-50 disabled:opacity-40"
-                    >
-                      {allSelected
-                        ? 'Clear visible'
-                        : 'Select visible'}
-                    </button>
-
-                    <button
-                      disabled={!selected.size}
-                      onClick={() =>
-                        setTab('composer')
-                      }
-                      className="rounded-xl bg-slate-950 px-4 py-2 text-xs font-semibold text-white transition hover:bg-slate-800 disabled:opacity-30"
-                    >
-                      Create campaign
-                      {selected.size > 0 &&
-                        ` · ${selected.size}`}
-                    </button>
-
-                  </div>
-
+                  <button
+                    onClick={clearFilters}
+                    className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-xs font-semibold text-slate-500 transition hover:bg-slate-50 hover:text-slate-900"
+                  >
+                    Reset all filters
+                  </button>
                 </div>
+              </aside>
 
-                {/* SELECTION BAR */}
+              {/* SCHOOL LIST */}
 
-                {selected.size > 0 && (
-                  <div className="mt-5 flex flex-col gap-3 rounded-xl bg-slate-950 px-4 py-3 text-white sm:flex-row sm:items-center sm:justify-between">
+              <section className="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+
+                <div className="border-b border-slate-100 px-5 py-5 sm:px-6">
+
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
 
                     <div>
-                      <span className="text-sm font-semibold">
-                        {selected.size}
-                      </span>{' '}
-                      schools selected
+                      <div className="flex items-center gap-2">
+                        <h2 className="text-base font-semibold">
+                          School audience
+                        </h2>
+
+                        {loading && (
+                          <span className="flex items-center gap-1.5 text-[10px] text-slate-400">
+                            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-slate-400" />
+                            Updating
+                          </span>
+                        )}
+                      </div>
+
+                      <p className="mt-1 text-xs text-slate-400">
+                        Choose exactly who should receive your campaign.
+                      </p>
                     </div>
 
-                    <div className="flex gap-4 text-xs text-slate-300">
-                      <span>
-                        {selectedEmailCount} email
-                      </span>
-
-                      <span>
-                        {selectedLeadCount} leads
-                      </span>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={toggleAll}
+                        disabled={!audience.schools.length}
+                        className="rounded-xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold transition hover:bg-slate-50 disabled:opacity-40"
+                      >
+                        {allSelected
+                          ? 'Clear visible'
+                          : 'Select visible'}
+                      </button>
 
                       <button
-                        onClick={() =>
-                          setSelected(
-                            new Set()
-                          )
-                        }
-                        className="font-medium text-white underline underline-offset-2"
+                        disabled={!selected.size}
+                        onClick={() => setTab('composer')}
+                        className="group flex items-center gap-2 rounded-xl bg-slate-950 px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-30"
                       >
-                        Clear
+                        Continue to email
+                        <Icon name="arrow" size={14} />
                       </button>
                     </div>
-
                   </div>
-                )}
 
-              </div>
+                  {/* SELECTION SUMMARY */}
 
-              <div className="overflow-x-auto">
+                  {selected.size > 0 && (
+                    <div className="mt-5 rounded-2xl bg-slate-950 p-4 text-white">
 
-                <table className="w-full min-w-[900px] text-left">
+                      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
-                  <thead>
-                    <tr className="border-b border-slate-100 bg-slate-50/70 text-[10px] font-bold uppercase tracking-[0.13em] text-slate-400">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10">
+                            <Icon name="check" size={17} />
+                          </div>
 
-                      <th className="w-12 px-5 py-3">
-                        <input
-                          type="checkbox"
-                          checked={
-                            allSelected
-                          }
-                          onChange={
-                            toggleAll
-                          }
-                          className="h-4 w-4"
-                        />
-                      </th>
+                          <div>
+                            <div className="text-sm font-semibold">
+                              {selected.size.toLocaleString()}{' '}
+                              schools selected
+                            </div>
 
-                      <th className="px-3 py-3">
-                        School
-                      </th>
+                            <div className="mt-0.5 text-[11px] text-slate-400">
+                              Your campaign is ready to compose.
+                            </div>
+                          </div>
+                        </div>
 
-                      <th className="px-3 py-3">
-                        Contact
-                      </th>
+                        <div className="flex items-center gap-4 text-[11px]">
+                          <span className="flex items-center gap-1.5 text-slate-300">
+                            <Icon name="mail" size={12} />
+                            {selectedEmailCount} email
+                          </span>
 
-                      <th className="px-3 py-3">
-                        Location
-                      </th>
+                          <span className="flex items-center gap-1.5 text-slate-300">
+                            <Icon name="spark" size={12} />
+                            {selectedLeadCount} leads
+                          </span>
 
-                      <th className="px-3 py-3">
-                        Sales
-                      </th>
+                          <button
+                            onClick={() =>
+                              setSelected(new Set())
+                            }
+                            className="font-medium text-white underline underline-offset-2"
+                          >
+                            Clear
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
 
-                      <th className="px-3 py-3">
-                        Discovery
-                      </th>
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[900px] text-left">
 
-                    </tr>
-                  </thead>
+                    <thead>
+                      <tr className="border-b border-slate-100 bg-slate-50/70 text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400">
 
-                  <tbody>
+                        <th className="w-12 px-5 py-3.5">
+                          <input
+                            type="checkbox"
+                            checked={allSelected}
+                            onChange={toggleAll}
+                            className="h-4 w-4 rounded border-slate-300 accent-slate-950"
+                          />
+                        </th>
 
-                    {audience.schools.map(
-                      (school) => (
+                        <th className="px-3 py-3.5">
+                          School
+                        </th>
+
+                        <th className="px-3 py-3.5">
+                          Contact
+                        </th>
+
+                        <th className="px-3 py-3.5">
+                          Location
+                        </th>
+
+                        <th className="px-3 py-3.5">
+                          Status
+                        </th>
+
+                        <th className="px-3 py-3.5">
+                          Discovery
+                        </th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {audience.schools.map((school) => (
                         <tr
                           key={school.id}
                           className={`border-b border-slate-100 transition last:border-0 ${
-                            selected.has(
-                              school.id
-                            )
+                            selected.has(school.id)
                               ? 'bg-slate-50'
-                              : 'hover:bg-slate-50/70'
+                              : 'hover:bg-slate-50/60'
                           }`}
                         >
-
                           <td className="px-5 py-4">
                             <input
                               type="checkbox"
-                              checked={selected.has(
-                                school.id
-                              )}
+                              checked={selected.has(school.id)}
                               onChange={() =>
-                                toggleSchool(
-                                  school.id
-                                )
+                                toggleSchool(school.id)
                               }
-                              className="h-4 w-4"
+                              className="h-4 w-4 rounded border-slate-300 accent-slate-950"
                             />
                           </td>
 
                           <td className="px-3 py-4">
-
                             <div className="flex items-start gap-3">
-
-                              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-xs font-bold text-slate-500">
+                              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-[10px] font-bold text-slate-500">
                                 {school.school_name
                                   .slice(0, 2)
                                   .toUpperCase()}
@@ -1105,49 +1241,51 @@ export default function DistributionPage() {
                                 </div>
 
                                 {school.address && (
-                                  <div className="mt-1 max-w-[280px] truncate text-xs text-slate-400">
+                                  <div className="mt-1 max-w-[260px] truncate text-[10px] text-slate-400">
                                     {school.address}
                                   </div>
                                 )}
                               </div>
-
                             </div>
-
                           </td>
 
                           <td className="px-3 py-4">
-
                             {school.email ? (
-                              <div>
-                                <div className="max-w-[260px] truncate text-sm text-slate-700">
-                                  {school.email}
-                                </div>
+                              <div className="flex items-start gap-2">
+                                <span className="mt-0.5 text-slate-300">
+                                  <Icon name="mail" size={13} />
+                                </span>
 
-                                {school.phone && (
-                                  <div className="mt-1 text-xs text-slate-400">
-                                    {school.phone}
+                                <div>
+                                  <div className="max-w-[240px] truncate text-xs font-medium text-slate-700">
+                                    {school.email}
                                   </div>
-                                )}
+
+                                  {school.phone && (
+                                    <div className="mt-1 flex items-center gap-1 text-[10px] text-slate-400">
+                                      <Icon name="phone" size={10} />
+                                      {school.phone}
+                                    </div>
+                                  )}
+                                </div>
                               </div>
                             ) : (
                               <div>
-                                <div className="text-sm text-slate-400">
+                                <div className="text-xs text-slate-400">
                                   No email
                                 </div>
 
                                 {school.phone && (
-                                  <div className="mt-1 text-xs text-slate-500">
+                                  <div className="mt-1 text-[10px] text-slate-500">
                                     {school.phone}
                                   </div>
                                 )}
                               </div>
                             )}
-
                           </td>
 
                           <td className="px-3 py-4">
-
-                            <div className="max-w-[220px] text-xs leading-5 text-slate-600">
+                            <div className="max-w-[210px] text-[11px] leading-5 text-slate-500">
                               {[
                                 school.area,
                                 school.city,
@@ -1155,17 +1293,13 @@ export default function DistributionPage() {
                                 school.state,
                               ]
                                 .filter(Boolean)
-                                .join(
-                                  ', '
-                                ) || 'Location unavailable'}
+                                .join(', ') ||
+                                'Location unavailable'}
                             </div>
-
                           </td>
 
                           <td className="px-3 py-4">
-
                             <div className="flex flex-wrap gap-1.5">
-
                               {school.is_lead && (
                                 <span className="rounded-full border border-amber-200 bg-amber-50 px-2 py-1 text-[9px] font-bold uppercase tracking-wide text-amber-700">
                                   Lead
@@ -1181,187 +1315,210 @@ export default function DistributionPage() {
                                   school.status
                                 )}
                               </span>
-
                             </div>
-
                           </td>
 
                           <td className="px-3 py-4">
-
                             {school.is_fresh ? (
                               <div className="flex items-center gap-2">
-                                <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
 
-                                <span className="text-xs font-semibold text-emerald-700">
+                                <span className="text-[11px] font-semibold text-emerald-700">
                                   Fresh
                                 </span>
                               </div>
                             ) : (
                               <div>
-                                <div className="text-xs font-medium text-slate-600">
-                                  {school.discovery_count ||
-                                    1}{' '}
+                                <div className="text-[11px] font-medium text-slate-600">
+                                  {school.discovery_count || 1}{' '}
                                   discoveries
                                 </div>
 
                                 {school.last_discovery_at && (
-                                  <div className="mt-1 text-[10px] text-slate-400">
+                                  <div className="mt-1 text-[9px] text-slate-400">
                                     Previously found
                                   </div>
                                 )}
                               </div>
                             )}
-
                           </td>
-
                         </tr>
-                      )
-                    )}
+                      ))}
 
-                    {!audience.schools.length && (
-                      <tr>
-                        <td
-                          colSpan={6}
-                          className="p-20 text-center"
-                        >
-                          <div className="mx-auto max-w-sm">
-                            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-lg">
-                              ◎
+                      {!audience.schools.length && (
+                        <tr>
+                          <td
+                            colSpan={6}
+                            className="p-20 text-center"
+                          >
+                            <div className="mx-auto max-w-sm">
+                              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
+                                <Icon name="search" size={21} />
+                              </div>
+
+                              <div className="mt-4 text-sm font-semibold">
+                                No schools found
+                              </div>
+
+                              <p className="mt-1 text-xs leading-6 text-slate-400">
+                                {loading
+                                  ? 'Updating your audience…'
+                                  : 'Try widening your location or removing some filters.'}
+                              </p>
                             </div>
-
-                            <div className="mt-4 font-semibold">
-                              No schools found
-                            </div>
-
-                            <p className="mt-1 text-sm leading-6 text-slate-400">
-                              {loading
-                                ? 'Updating your audience…'
-                                : 'Try widening your location or removing some filters.'}
-                            </p>
-                          </div>
-                        </td>
-                      </tr>
-                    )}
-
-                  </tbody>
-
-                </table>
-
-              </div>
-
-              {audience.schools.length > 0 && (
-                <div className="border-t border-slate-100 px-5 py-3 text-xs text-slate-400">
-                  Showing {audience.schools.length} visible schools from an audience of{' '}
-                  {audience.total.toLocaleString()}.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
                 </div>
-              )}
 
+                {audience.schools.length > 0 && (
+                  <div className="flex items-center justify-between border-t border-slate-100 px-5 py-3 text-[10px] text-slate-400">
+                    <span>
+                      Showing {audience.schools.length} visible
+                      schools
+                    </span>
+
+                    <span>
+                      {audience.total.toLocaleString()} total
+                      matches
+                    </span>
+                  </div>
+                )}
+              </section>
             </section>
-
-          </section>
+          </>
         )}
 
         {/* COMPOSER */}
 
         {tab === 'composer' && (
-          <section>
-
-            <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-
+          <>
+            <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div>
-                <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
-                  New campaign
+                <div className="mb-2 flex items-center gap-2">
+                  <span className="rounded-full bg-slate-100 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.14em] text-slate-500">
+                    Step 2
+                  </span>
+
+                  <span className="text-[10px] text-slate-400">
+                    {selected.size} recipients
+                  </span>
                 </div>
 
-                <h2 className="mt-1 text-2xl font-semibold tracking-tight">
-                  Compose broadcast
+                <h2 className="text-2xl font-semibold tracking-[-0.035em]">
+                  Compose your email
                 </h2>
 
                 <p className="mt-1 text-sm text-slate-500">
-                  Prepare the message that will be sent to your selected schools.
+                  Write once. Personalization is handled automatically for each school.
                 </p>
               </div>
 
               <button
-                onClick={() =>
-                  setTab('audience')
-                }
-                className="w-fit rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium shadow-sm"
+                onClick={() => setTab('audience')}
+                className="flex w-fit items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold shadow-sm transition hover:bg-slate-50"
               >
-                ← Audience
+                ← Back to audience
               </button>
-
             </div>
 
-            <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_430px]">
+            {/* COMPOSER WORKSPACE */}
 
-              {/* EDITOR */}
+            <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_400px]">
 
-              <div className="rounded-[22px] border border-slate-200 bg-white shadow-sm">
+              {/* EMAIL EDITOR */}
 
-                <div className="border-b border-slate-100 px-5 py-4 sm:px-6">
-                  <div className="flex items-center justify-between">
+              <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+
+                <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4 sm:px-6">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-950 text-white">
+                      <Icon name="mail" size={16} />
+                    </div>
 
                     <div>
-                      <div className="font-semibold">
-                        Email
+                      <div className="text-sm font-semibold">
+                        New broadcast
                       </div>
 
-                      <div className="mt-0.5 text-xs text-slate-400">
-                        {selected.size.toLocaleString()} recipients
+                      <div className="text-[10px] text-slate-400">
+                        Email campaign
                       </div>
                     </div>
-
-                    <div className="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold text-emerald-700">
-                      Draft
-                    </div>
-
                   </div>
+
+                  <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wide text-emerald-700">
+                    Draft
+                  </span>
                 </div>
 
-                <div className="space-y-5 p-5 sm:p-6">
+                <div className="p-5 sm:p-6">
 
-                  <div>
-                    <label className="mb-2 block text-xs font-semibold text-slate-600">
+                  {/* FROM */}
+
+                  <div className="border-b border-slate-100 pb-5">
+                    <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
                       From
                     </label>
 
-                    <input
-                      value={senderName}
-                      onChange={(event) =>
-                        setSenderName(
-                          event.target.value
+                    <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-[10px] font-bold text-slate-500 shadow-sm">
+                        {(
+                          senderName || 'TH'
                         )
-                      }
-                      placeholder="TheHandler"
-                      className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:bg-white focus:border-slate-400"
-                    />
+                          .slice(0, 2)
+                          .toUpperCase()}
+                      </div>
+
+                      <input
+                        value={senderName}
+                        onChange={(event) =>
+                          setSenderName(event.target.value)
+                        }
+                        placeholder="TheHandler"
+                        className="min-w-0 flex-1 bg-transparent text-xs font-medium outline-none placeholder:text-slate-400"
+                      />
+                    </div>
                   </div>
 
-                  <div>
-                    <label className="mb-2 block text-xs font-semibold text-slate-600">
+                  {/* SUBJECT */}
+
+                  <div className="border-b border-slate-100 py-5">
+                    <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
                       Subject
                     </label>
 
                     <input
                       value={subject}
                       onChange={(event) =>
-                        setSubject(
-                          event.target.value
-                        )
+                        setSubject(event.target.value)
                       }
-                      placeholder="e.g. A simpler way to manage your school"
-                      className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:bg-white focus:border-slate-400"
+                      placeholder="Give your email a clear, compelling subject"
+                      className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-sm font-medium outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
                     />
+
+                    <div className="mt-2 flex justify-between text-[10px] text-slate-400">
+                      <span>
+                        Keep it short and specific.
+                      </span>
+
+                      <span>
+                        {subject.length} characters
+                      </span>
+                    </div>
                   </div>
 
-                  <div>
+                  {/* MESSAGE */}
+
+                  <div className="pt-5">
                     <div className="mb-2 flex items-center justify-between">
-                      <label className="text-xs font-semibold text-slate-600">
+                      <label className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
                         Message
                       </label>
 
-                      <span className="text-[10px] text-slate-400">
+                      <span className="rounded-md bg-slate-100 px-2 py-1 text-[9px] font-semibold text-slate-500">
                         HTML
                       </span>
                     </div>
@@ -1369,387 +1526,424 @@ export default function DistributionPage() {
                     <textarea
                       value={body}
                       onChange={(event) =>
-                        setBody(
-                          event.target.value
-                        )
+                        setBody(event.target.value)
                       }
-                      className="min-h-[420px] w-full resize-y rounded-xl border border-slate-200 bg-slate-950 px-4 py-4 font-mono text-xs leading-6 text-slate-100 outline-none"
+                      className="min-h-[430px] w-full resize-y rounded-xl border border-slate-200 bg-[#101216] px-4 py-4 font-mono text-[11px] leading-6 text-slate-200 outline-none transition focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
                       placeholder="Write your email HTML here…"
                     />
-                  </div>
 
-                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                    {/* VARIABLES */}
 
-                    <div className="text-xs font-semibold">
-                      Personalization
-                    </div>
+                    <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                      <div className="flex items-center gap-2">
+                        <span className="text-slate-500">
+                          <Icon name="spark" size={14} />
+                        </span>
 
-                    <p className="mt-1 text-xs leading-5 text-slate-500">
-                      These values are replaced for each school before delivery.
-                    </p>
-
-                    <div className="mt-3 flex flex-wrap gap-2">
-
-                      <code className="rounded-lg bg-white px-2.5 py-1.5 text-[11px] text-slate-600 shadow-sm">
-                        {'{{school_name}}'}
-                      </code>
-
-                      <code className="rounded-lg bg-white px-2.5 py-1.5 text-[11px] text-slate-600 shadow-sm">
-                        {'{{status}}'}
-                      </code>
-
-                    </div>
-
-                  </div>
-
-                </div>
-
-              </div>
-
-              {/* PREVIEW + CAMPAIGN INFO */}
-
-              <div className="space-y-5">
-
-                <div className="rounded-[22px] border border-slate-200 bg-white p-5 shadow-sm">
-
-                  <div className="mb-4 flex items-center justify-between">
-                    <div>
-                      <div className="font-semibold">
-                        Campaign preview
+                        <div className="text-xs font-semibold">
+                          Personalization
+                        </div>
                       </div>
 
-                      <div className="mt-0.5 text-xs text-slate-400">
+                      <p className="mt-1 text-[10px] leading-5 text-slate-500">
+                        These variables are automatically replaced for
+                        each recipient before delivery.
+                      </p>
+
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        <code className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[10px] font-medium text-slate-600">
+                          {'{{school_name}}'}
+                        </code>
+
+                        <code className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[10px] font-medium text-slate-600">
+                          {'{{status}}'}
+                        </code>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* RIGHT COLUMN */}
+
+              <aside className="space-y-5">
+
+                {/* PREVIEW */}
+
+                <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                  <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+                    <div>
+                      <div className="text-sm font-semibold">
+                        Live preview
+                      </div>
+
+                      <div className="mt-0.5 text-[10px] text-slate-400">
                         Example recipient
                       </div>
                     </div>
 
-                    <span className="rounded-lg bg-slate-100 px-2 py-1 text-[10px] font-medium text-slate-500">
-                      Preview
+                    <span className="rounded-lg bg-slate-100 px-2 py-1 text-[9px] font-semibold text-slate-500">
+                      PREVIEW
                     </span>
                   </div>
 
-                  <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                  <div className="p-4">
+                    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
 
-                    <div className="border-b border-slate-100 bg-slate-50 px-5 py-4">
+                      <div className="border-b border-slate-100 bg-slate-50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-950 text-[8px] font-bold text-white">
+                            {(
+                              senderName || 'TH'
+                            )
+                              .slice(0, 2)
+                              .toUpperCase()}
+                          </div>
 
-                      <div className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
-                        {senderName ||
-                          'TheHandler'}
+                          <div className="min-w-0">
+                            <div className="text-[9px] font-medium text-slate-500">
+                              {senderName || 'TheHandler'}
+                            </div>
+
+                            <div className="truncate text-[11px] font-semibold text-slate-900">
+                              {subject ||
+                                'Your campaign subject'}
+                            </div>
+                          </div>
+                        </div>
                       </div>
 
-                      <div className="mt-1 truncate font-semibold">
-                        {subject ||
-                          'Your campaign subject'}
+                      <div
+                        className="prose prose-sm max-w-none overflow-auto p-5 text-xs"
+                        dangerouslySetInnerHTML={{
+                          __html: previewBody,
+                        }}
+                      />
+                    </div>
+                  </div>
+                </section>
+
+                {/* RECIPIENT CARD */}
+
+                <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-sm font-semibold">
+                        Ready to send
                       </div>
 
+                      <div className="mt-0.5 text-[10px] text-slate-400">
+                        Delivery audience
+                      </div>
                     </div>
 
-                    <div
-                      className="prose prose-sm max-w-none p-6"
-                      dangerouslySetInnerHTML={{
-                        __html:
-                          previewBody,
-                      }}
-                    />
-
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100">
+                      <Icon name="users" size={16} />
+                    </div>
                   </div>
 
-                </div>
+                  <div className="mt-5 space-y-1">
 
-                {/* RECIPIENT SUMMARY */}
+                    <div className="flex items-center justify-between rounded-xl px-3 py-3 hover:bg-slate-50">
+                      <span className="text-xs text-slate-500">
+                        Schools selected
+                      </span>
 
-                <div className="rounded-[22px] border border-slate-200 bg-white p-5 shadow-sm">
+                      <span className="text-sm font-semibold">
+                        {selected.size.toLocaleString()}
+                      </span>
+                    </div>
 
-                  <div className="font-semibold">
-                    Delivery audience
+                    <div className="flex items-center justify-between rounded-xl px-3 py-3 hover:bg-slate-50">
+                      <span className="text-xs text-slate-500">
+                        Valid email addresses
+                      </span>
+
+                      <span className="text-sm font-semibold">
+                        {selectedEmailCount.toLocaleString()}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between rounded-xl px-3 py-3 hover:bg-slate-50">
+                      <span className="text-xs text-slate-500">
+                        Leads included
+                      </span>
+
+                      <span className="text-sm font-semibold">
+                        {selectedLeadCount.toLocaleString()}
+                      </span>
+                    </div>
                   </div>
 
-                  <div className="mt-4 divide-y divide-slate-100">
-
-                    <div className="flex items-center justify-between py-3">
-                      <span className="text-sm text-slate-500">
-                        Selected schools
-                      </span>
-
-                      <span className="font-semibold">
-                        {selected.size}
-                      </span>
+                  {selectedEmailCount < selected.size && (
+                    <div className="mt-3 rounded-xl bg-amber-50 px-3 py-2.5 text-[10px] leading-5 text-amber-700">
+                      {selected.size - selectedEmailCount}{' '}
+                      selected schools do not have an email address
+                      and will not be reachable by email.
                     </div>
+                  )}
+                </section>
 
-                    <div className="flex items-center justify-between py-3">
-                      <span className="text-sm text-slate-500">
-                        Email addresses
-                      </span>
+                {/* DELIVERY INFO */}
 
-                      <span className="font-semibold">
-                        {selectedEmailCount}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between py-3">
-                      <span className="text-sm text-slate-500">
-                        Leads
-                      </span>
-
-                      <span className="font-semibold">
-                        {selectedLeadCount}
-                      </span>
-                    </div>
-
-                  </div>
-
-                </div>
-
-                {/* RESEND */}
-
-                <div className="rounded-[22px] border border-slate-200 bg-slate-950 p-5 text-white shadow-sm">
+                <section className="rounded-2xl bg-slate-950 p-5 text-white shadow-sm">
 
                   <div className="flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-emerald-400" />
+                    <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/10">
+                      <Icon name="send" size={13} />
+                    </span>
 
-                    <span className="text-sm font-semibold">
-                      Delivery infrastructure
+                    <span className="text-xs font-semibold">
+                      Campaign delivery
                     </span>
                   </div>
 
-                  <p className="mt-2 text-xs leading-5 text-slate-400">
-                    Campaigns are queued first. Once your Resend API key and verified sending domain are configured, the worker can deliver queued campaigns automatically.
+                  <p className="mt-3 text-[10px] leading-5 text-slate-400">
+                    Your campaign is queued first and then delivered by
+                    the configured email infrastructure. Each school
+                    receives its personalized version of the message.
                   </p>
 
-                </div>
+                  <div className="mt-4 flex items-center gap-2 text-[9px] font-medium text-slate-300">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                    Resend infrastructure
+                  </div>
+                </section>
+
+                {/* SEND */}
 
                 <button
                   disabled={
                     sending ||
-                    !selected.size
+                    !selected.size ||
+                    !selectedEmailCount
                   }
                   onClick={queueBroadcast}
-                  className="w-full rounded-xl bg-slate-950 px-5 py-3.5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-30"
+                  className="group flex w-full items-center justify-center gap-3 rounded-2xl bg-slate-950 px-5 py-4 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-30"
                 >
-                  {sending
-                    ? 'Queueing campaign…'
-                    : `Queue campaign · ${selectedEmailCount} recipients`}
+                  <span>
+                    {sending
+                      ? 'Queueing campaign…'
+                      : `Send to ${selectedEmailCount.toLocaleString()} recipients`}
+                  </span>
+
+                  {!sending && (
+                    <span className="transition group-hover:translate-x-0.5">
+                      <Icon name="arrow" size={16} />
+                    </span>
+                  )}
                 </button>
 
-              </div>
-
+                <p className="text-center text-[9px] leading-4 text-slate-400">
+                  You will be asked to confirm before the campaign is
+                  queued.
+                </p>
+              </aside>
             </div>
-
-          </section>
+          </>
         )}
 
         {/* HISTORY */}
 
         {tab === 'history' && (
-          <section>
-
-            <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <>
+            <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
 
               <div>
-                <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
-                  Campaigns
+                <div className="mb-2 flex items-center gap-2">
+                  <span className="rounded-full bg-slate-100 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.14em] text-slate-500">
+                    Step 3
+                  </span>
+
+                  <span className="text-[10px] text-slate-400">
+                    Campaign records
+                  </span>
                 </div>
 
-                <h2 className="mt-1 text-2xl font-semibold tracking-tight">
+                <h2 className="text-2xl font-semibold tracking-[-0.035em]">
                   Broadcast history
                 </h2>
 
                 <p className="mt-1 text-sm text-slate-500">
-                  Every campaign remains recorded here.
+                  Track every campaign that has passed through your distribution system.
                 </p>
               </div>
 
               <button
                 onClick={loadHistory}
-                className="w-fit rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold shadow-sm hover:bg-slate-50"
+                className="flex w-fit items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold shadow-sm transition hover:bg-slate-50"
               >
+                <Icon name="refresh" size={14} />
                 Refresh
               </button>
-
             </div>
 
-            <div className="overflow-hidden rounded-[22px] border border-slate-200 bg-white shadow-sm">
+            {/* HISTORY METRICS */}
 
-              <div className="grid grid-cols-2 divide-x border-b border-slate-100 sm:grid-cols-4">
+            <div className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
 
-                <div className="p-5">
-                  <div className="text-[10px] font-bold uppercase tracking-[0.13em] text-slate-400">
-                    Campaigns
+              {[
+                {
+                  label: 'Campaigns',
+                  value: history.length,
+                },
+                {
+                  label: 'Recipients',
+                  value: history.reduce(
+                    (total, campaign) =>
+                      total + campaign.recipient_count,
+                    0
+                  ),
+                },
+                {
+                  label: 'Sent',
+                  value: deliveryRate,
+                },
+                {
+                  label: 'Failed',
+                  value: history.reduce(
+                    (total, campaign) =>
+                      total + campaign.failed_count,
+                    0
+                  ),
+                },
+              ].map((metric) => (
+                <div
+                  key={metric.label}
+                  className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+                >
+                  <div className="text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                    {metric.label}
                   </div>
 
-                  <div className="mt-1 text-2xl font-semibold">
-                    {history.length}
-                  </div>
-                </div>
-
-                <div className="p-5">
-                  <div className="text-[10px] font-bold uppercase tracking-[0.13em] text-slate-400">
-                    Recipients
-                  </div>
-
-                  <div className="mt-1 text-2xl font-semibold">
-                    {history
-                      .reduce(
-                        (
-                          total,
-                          campaign
-                        ) =>
-                          total +
-                          campaign.recipient_count,
-                        0
-                      )
-                      .toLocaleString()}
-                  </div>
-                </div>
-
-                <div className="p-5">
-                  <div className="text-[10px] font-bold uppercase tracking-[0.13em] text-slate-400">
-                    Sent
-                  </div>
-
-                  <div className="mt-1 text-2xl font-semibold">
-                    {history
-                      .reduce(
-                        (
-                          total,
-                          campaign
-                        ) =>
-                          total +
-                          campaign.sent_count,
-                        0
-                      )
-                      .toLocaleString()}
+                  <div className="mt-2 text-2xl font-semibold tracking-tight">
+                    {metric.value.toLocaleString()}
                   </div>
                 </div>
+              ))}
+            </div>
 
-                <div className="p-5">
-                  <div className="text-[10px] font-bold uppercase tracking-[0.13em] text-slate-400">
-                    Failed
+            {/* TABLE */}
+
+            <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+
+              <div className="border-b border-slate-100 px-5 py-4 sm:px-6">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100">
+                    <Icon name="clock" size={15} />
                   </div>
 
-                  <div className="mt-1 text-2xl font-semibold">
-                    {history
-                      .reduce(
-                        (
-                          total,
-                          campaign
-                        ) =>
-                          total +
-                          campaign.failed_count,
-                        0
-                      )
-                      .toLocaleString()}
+                  <div>
+                    <div className="text-sm font-semibold">
+                      Campaign activity
+                    </div>
+
+                    <div className="text-[10px] text-slate-400">
+                      Recent broadcast activity
+                    </div>
                   </div>
                 </div>
-
               </div>
 
               <div className="overflow-x-auto">
-
                 <table className="w-full min-w-[850px] text-left">
 
                   <thead>
-                    <tr className="border-b border-slate-100 bg-slate-50/70 text-[10px] font-bold uppercase tracking-[0.13em] text-slate-400">
+                    <tr className="border-b border-slate-100 bg-slate-50/70 text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400">
 
-                      <th className="px-5 py-3">
+                      <th className="px-5 py-3.5">
                         Campaign
                       </th>
 
-                      <th className="px-3 py-3">
+                      <th className="px-3 py-3.5">
                         Recipients
                       </th>
 
-                      <th className="px-3 py-3">
+                      <th className="px-3 py-3.5">
                         Delivered
                       </th>
 
-                      <th className="px-3 py-3">
+                      <th className="px-3 py-3.5">
                         Failed
                       </th>
 
-                      <th className="px-3 py-3">
+                      <th className="px-3 py-3.5">
                         Status
                       </th>
 
-                      <th className="px-3 py-3">
+                      <th className="px-3 py-3.5">
                         Created
                       </th>
-
                     </tr>
                   </thead>
 
                   <tbody>
-
-                    {history.map(
-                      (campaign) => (
-                        <tr
-                          key={campaign.id}
-                          className="border-b border-slate-100 last:border-0 hover:bg-slate-50/70"
-                        >
-
-                          <td className="px-5 py-4">
-
-                            <div className="font-semibold">
-                              {campaign.subject}
+                    {history.map((campaign) => (
+                      <tr
+                        key={campaign.id}
+                        className="border-b border-slate-100 last:border-0 hover:bg-slate-50/60"
+                      >
+                        <td className="px-5 py-4">
+                          <div className="flex items-start gap-3">
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500">
+                              <Icon name="mail" size={14} />
                             </div>
 
-                            <div className="mt-1 text-xs text-slate-400">
-                              From{' '}
-                              {campaign.sender_name}
-                            </div>
-
-                          </td>
-
-                          <td className="px-3 py-4 text-sm font-medium">
-                            {campaign.recipient_count.toLocaleString()}
-                          </td>
-
-                          <td className="px-3 py-4">
-
-                            <div className="font-medium">
-                              {campaign.sent_count.toLocaleString()}
-                            </div>
-
-                            {campaign.recipient_count > 0 && (
-                              <div className="mt-1 text-[10px] text-slate-400">
-                                {Math.round(
-                                  (campaign.sent_count /
-                                    campaign.recipient_count) *
-                                    100
-                                )}
-                                % sent
+                            <div className="min-w-0">
+                              <div className="max-w-[330px] truncate text-xs font-semibold">
+                                {campaign.subject}
                               </div>
-                            )}
 
-                          </td>
+                              <div className="mt-1 text-[10px] text-slate-400">
+                                From {campaign.sender_name}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
 
-                          <td className="px-3 py-4 text-sm">
-                            {campaign.failed_count}
-                          </td>
+                        <td className="px-3 py-4 text-xs font-medium">
+                          {campaign.recipient_count.toLocaleString()}
+                        </td>
 
-                          <td className="px-3 py-4">
+                        <td className="px-3 py-4">
+                          <div className="text-xs font-semibold">
+                            {campaign.sent_count.toLocaleString()}
+                          </div>
 
-                            <span
-                              className={`rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-wide ${broadcastStatusClasses(
-                                campaign.status
-                              )}`}
-                            >
-                              {formatStatus(
-                                campaign.status
+                          {campaign.recipient_count > 0 && (
+                            <div className="mt-1 text-[9px] text-slate-400">
+                              {Math.round(
+                                (campaign.sent_count /
+                                  campaign.recipient_count) *
+                                  100
                               )}
-                            </span>
+                              % sent
+                            </div>
+                          )}
+                        </td>
 
-                          </td>
+                        <td className="px-3 py-4 text-xs">
+                          {campaign.failed_count}
+                        </td>
 
-                          <td className="px-3 py-4 text-xs text-slate-400">
-                            {new Date(
-                              campaign.created_at
-                            ).toLocaleString()}
-                          </td>
+                        <td className="px-3 py-4">
+                          <span
+                            className={`rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-wide ${broadcastStatusClasses(
+                              campaign.status
+                            )}`}
+                          >
+                            {formatStatus(campaign.status)}
+                          </span>
+                        </td>
 
-                        </tr>
-                      )
-                    )}
+                        <td className="px-3 py-4 text-[10px] text-slate-400">
+                          {new Date(
+                            campaign.created_at
+                          ).toLocaleString()}
+                        </td>
+                      </tr>
+                    ))}
 
                     {!history.length && (
                       <tr>
@@ -1758,35 +1952,35 @@ export default function DistributionPage() {
                           className="p-20 text-center"
                         >
                           <div className="mx-auto max-w-sm">
-
-                            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100">
-                              ◌
+                            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
+                              <Icon name="mail" size={20} />
                             </div>
 
-                            <div className="mt-4 font-semibold">
+                            <div className="mt-4 text-sm font-semibold">
                               No campaigns yet
                             </div>
 
-                            <p className="mt-1 text-sm leading-6 text-slate-400">
-                              Your queued and completed broadcasts will appear here.
+                            <p className="mt-1 text-xs leading-6 text-slate-400">
+                              Once you send your first campaign, its
+                              delivery activity will appear here.
                             </p>
 
+                            <button
+                              onClick={() => setTab('audience')}
+                              className="mt-5 rounded-xl bg-slate-950 px-4 py-2.5 text-xs font-semibold text-white"
+                            >
+                              Build an audience
+                            </button>
                           </div>
                         </td>
                       </tr>
                     )}
-
                   </tbody>
-
                 </table>
-
               </div>
-
-            </div>
-
-          </section>
+            </section>
+          </>
         )}
-
       </div>
     </main>
   )
