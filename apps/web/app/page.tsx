@@ -1,0 +1,2 @@
+import Link from 'next/link'
+export default function Home(){return <main className="landing"><div className="landing-card"><p className="eyebrow">THEHANDLER</p><h1>School Lead Engine</h1><p className="muted">Find schools, understand the opportunity and plan the next visit.</p><div className="landing-actions"><Link className="button compact" href="/dashboard">Open dashboard</Link><Link className="button ghost compact" href="/leads">Open leads</Link></div></div></main>}
