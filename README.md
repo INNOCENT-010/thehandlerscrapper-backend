@@ -60,6 +60,14 @@ Worker:
 - `CRAWL_MAX_PAGES_PER_SCHOOL`
 - `CRAWL_DELAY_MS`
 
+Mailroom delivery variables:
+- MAILROOM_API_URL — self-hosted gateway base, ending in /api/v1
+- MAILROOM_API_KEY — send-only key for TheHandler's Mailroom workspace
+- MAILROOM_WORKSPACE_ID — Posta workspace ID
+- MAILROOM_FROM_EMAIL — verified sender address
+- MAILROOM_FROM_NAME
+- MAILROOM_UNSUBSCRIBE_LIST_ID — Mailroom-managed outreach unsubscribe list
+
 ## Google setup
 
 Enable **Places API (New)** and billing in Google Cloud, then create a server-side API key. The worker uses Text Search (New) and Place Details (New). Keep the key server-side.
@@ -72,9 +80,19 @@ The implementation intentionally uses a narrow field mask to control cost.
 
 Other terminal states: `NOT_INTERESTED`, `LOST`, `DO_NOT_CONTACT`.
 
+## Outreach delivery
+
+The Distribution dashboard owns lead selection and CRM history. It does not
+deliver mail itself. The worker submits one personalized message per selected
+school to the self-hosted Mailroom/Posta API with a stable idempotency key.
+Mailroom remains authoritative for queuing, rate limits, bounces, complaints,
+suppression and one-click unsubscribe.
+
+Before enabling broadcasts, apply supabase/migrations/002_outreach_delivery.sql
+and configure the six MAILROOM_* worker variables. Do not configure Resend.
+
 ## What is intentionally not included
 
-- mass email sender
 - automatic spam campaigns
 - scraping behind logins
 - social-account credential collection

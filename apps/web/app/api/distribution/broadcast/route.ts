@@ -3,13 +3,32 @@ import { supabaseAdmin } from '@/lib/supabase-admin'
 
 export const dynamic = 'force-dynamic'
 
+type RequestedRecipient = {
+  school_id: string
+  email: string
+}
+
 export async function POST(request: NextRequest) {
   try {
     const db = supabaseAdmin()
 
     const payload = await request.json()
 
-    const schoolIds = Array.isArray(payload.school_ids)
+    const requestedRecipients: RequestedRecipient[] = Array.isArray(payload.recipients)
+      ? (payload.recipients as unknown[]).filter(
+          (recipient: unknown): recipient is RequestedRecipient =>
+            Boolean(
+              recipient &&
+              typeof recipient === 'object' &&
+              typeof (recipient as { school_id?: unknown }).school_id === 'string' &&
+              typeof (recipient as { email?: unknown }).email === 'string'
+            )
+        )
+      : []
+
+    const schoolIds = requestedRecipients.length
+      ? [...new Set(requestedRecipients.map((recipient) => recipient.school_id))]
+      : Array.isArray(payload.school_ids)
       ? payload.school_ids.filter(
           (id: unknown): id is string =>
             typeof id === 'string'
@@ -80,11 +99,44 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const eligible = (schools || []).filter(
-      (school) =>
-        school.email?.trim() &&
-        school.status !== 'DO_NOT_CONTACT'
+    const { data: contacts, error: contactsError } = await db
+      .from('school_contacts')
+      .select('school_id,email,opted_out')
+      .in('school_id', schoolIds)
+      .not('email', 'is', null)
+
+    if (contactsError) {
+      return NextResponse.json(
+        { error: contactsError.message },
+        { status: 500 }
+      )
+    }
+
+    const allowedEmails = new Map<string, Set<string>>()
+    for (const school of schools || []) {
+      const set = new Set<string>()
+      if (school.email?.trim()) set.add(school.email.trim().toLowerCase())
+      allowedEmails.set(school.id, set)
+    }
+    for (const contact of contacts || []) {
+      if (contact.opted_out || !contact.email?.trim()) continue
+      allowedEmails.get(contact.school_id)?.add(contact.email.trim().toLowerCase())
+    }
+
+    const selectedEmailBySchool = new Map(
+      requestedRecipients.map((recipient) => [
+        recipient.school_id,
+        recipient.email.trim().toLowerCase(),
+      ])
     )
+
+    const eligible = (schools || []).flatMap((school) => {
+      if (school.status === 'DO_NOT_CONTACT') return []
+      const selectedEmail = selectedEmailBySchool.get(school.id)
+      const email = selectedEmail || school.email?.trim().toLowerCase()
+      if (!email || !allowedEmails.get(school.id)?.has(email)) return []
+      return [{ ...school, selected_email: email }]
+    })
 
     if (!eligible.length) {
       return NextResponse.json(
@@ -123,7 +175,7 @@ export async function POST(request: NextRequest) {
     const recipients = eligible.map((school) => ({
       broadcast_id: broadcast.id,
       school_id: school.id,
-      email: school.email.trim(),
+      email: school.selected_email,
       status: 'QUEUED',
     }))
 

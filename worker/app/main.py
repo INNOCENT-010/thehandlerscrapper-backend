@@ -33,14 +33,18 @@ BROADCAST_BATCH_SIZE = 100
 
 BROADCAST_MAX_ATTEMPTS = 3
 
-RESEND_API_URL = "https://api.resend.com"
+MAILROOM_API_URL = os.getenv(
+    "MAILROOM_API_URL",
+    "http://gateway:8080/api/v1",
+).rstrip("/")
 
-RESEND_API_KEY = os.getenv("RESEND_API_KEY")
+MAILROOM_API_KEY = os.getenv("MAILROOM_API_KEY")
+MAILROOM_WORKSPACE_ID = os.getenv("MAILROOM_WORKSPACE_ID")
+MAILROOM_FROM_EMAIL = os.getenv("MAILROOM_FROM_EMAIL")
+MAILROOM_UNSUBSCRIBE_LIST_ID = os.getenv("MAILROOM_UNSUBSCRIBE_LIST_ID")
 
-RESEND_FROM_EMAIL = os.getenv("RESEND_FROM_EMAIL")
-
-RESEND_FROM_NAME = os.getenv(
-    "RESEND_FROM_NAME",
+MAILROOM_FROM_NAME = os.getenv(
+    "MAILROOM_FROM_NAME",
     "TheHandler"
 )
 
@@ -69,10 +73,12 @@ def utc_now():
     ).isoformat()
 
 
-def resend_configured():
+def mailroom_configured():
     return bool(
-        RESEND_API_KEY
-        and RESEND_FROM_EMAIL
+        MAILROOM_API_KEY
+        and MAILROOM_WORKSPACE_ID
+        and MAILROOM_FROM_EMAIL
+        and MAILROOM_UNSUBSCRIBE_LIST_ID
     )
 
 
@@ -1210,22 +1216,23 @@ def personalize_body(
 # SEND SINGLE EMAIL
 # ============================================================
 
-async def send_resend_email(
+async def send_mailroom_email(
     email: str,
     subject: str,
     body_html: str,
     sender_name: str,
+    idempotency_key: str,
 ):
 
-    if not resend_configured():
+    if not mailroom_configured():
 
         raise Exception(
-            "Resend is not configured"
+            "Mailroom is not configured"
         )
 
     from_address = (
         f"{sender_name} "
-        f"<{RESEND_FROM_EMAIL}>"
+        f"<{MAILROOM_FROM_EMAIL}>"
     )
 
     payload = {
@@ -1241,15 +1248,25 @@ async def send_resend_email(
 
         "html":
             body_html,
+
+        "unsubscribe": {
+            "list_id": int(MAILROOM_UNSUBSCRIBE_LIST_ID),
+        },
     }
 
     headers = {
 
         "Authorization":
-            f"Bearer {RESEND_API_KEY}",
+            f"Bearer {MAILROOM_API_KEY}",
 
         "Content-Type":
             "application/json",
+
+        "X-Posta-Workspace-Id":
+            MAILROOM_WORKSPACE_ID,
+
+        "Idempotency-Key":
+            idempotency_key,
     }
 
     async with httpx.AsyncClient(
@@ -1257,7 +1274,7 @@ async def send_resend_email(
     ) as http:
 
         response = await http.post(
-            f"{RESEND_API_URL}/emails",
+            f"{MAILROOM_API_URL}/emails/send",
             headers=headers,
             json=payload,
         )
@@ -1265,7 +1282,7 @@ async def send_resend_email(
         if response.status_code >= 400:
 
             raise Exception(
-                f"Resend {response.status_code}: "
+                f"Mailroom {response.status_code}: "
                 f"{response.text}"
             )
 
@@ -1298,10 +1315,10 @@ async def process_broadcast(
         "========================================"
     )
 
-    if not resend_configured():
+    if not mailroom_configured():
 
         print(
-            "RESEND NOT CONFIGURED."
+            "MAILROOM NOT CONFIGURED."
         )
 
         print(
@@ -1699,7 +1716,7 @@ async def process_broadcast(
         try:
 
             response = (
-                await send_resend_email(
+                await send_mailroom_email(
                     email=recipient[
                         "email"
                     ],
@@ -1715,13 +1732,17 @@ async def process_broadcast(
                         campaign[
                             "sender_name"
                         ],
+
+                    idempotency_key=(
+                        f"broadcast:{broadcast_id}:"
+                        f"recipient:{recipient_id}"
+                    ),
                 )
             )
 
-            resend_id = (
-                response.get(
-                    "id"
-                )
+            provider_message_id = (
+                response.get("data", {}).get("id")
+                or response.get("id")
             )
 
             (
@@ -1732,10 +1753,10 @@ async def process_broadcast(
                 .update({
 
                     "status":
-                        "SENT",
+                        "SUBMITTED",
 
-                    "resend_id":
-                        resend_id,
+                    "provider_message_id":
+                        provider_message_id,
 
                     "sent_at":
                         utc_now(),
@@ -1754,7 +1775,7 @@ async def process_broadcast(
             sent_this_batch += 1
 
             print(
-                f"BROADCAST SENT: "
+                f"BROADCAST SUBMITTED: "
                 f"{recipient['email']}"
             )
 
@@ -1853,7 +1874,7 @@ async def process_broadcast(
     sent_count = sum(
         1
         for row in stats
-        if row["status"] == "SENT"
+        if row["status"] == "SUBMITTED"
     )
 
     failed_count = sum(
@@ -1892,7 +1913,7 @@ async def process_broadcast(
 
     print(
         f"BROADCAST BATCH COMPLETE: "
-        f"{sent_this_batch} sent | "
+        f"{sent_this_batch} submitted | "
         f"{failed_this_batch} failed | "
         f"{queued_count} remaining"
     )
@@ -1941,7 +1962,7 @@ async def finish_broadcast(
     sent = sum(
         1
         for row in rows
-        if row["status"] == "SENT"
+        if row["status"] == "SUBMITTED"
     )
 
     failed = sum(
@@ -1972,7 +1993,7 @@ async def finish_broadcast(
 
     elif sent == total:
 
-        final_status = "SENT"
+        final_status = "SUBMITTED"
 
     else:
 
@@ -2017,7 +2038,7 @@ async def finish_broadcast(
 
 async def process_next_broadcast():
 
-    if not resend_configured():
+    if not mailroom_configured():
 
         return False
 
@@ -2182,8 +2203,8 @@ async def worker_loop():
     )
 
     print(
-        "Resend configured:",
-        resend_configured()
+        "Mailroom configured:",
+        mailroom_configured()
     )
 
     while True:
@@ -2271,8 +2292,8 @@ def health():
         "worker":
             "running",
 
-        "resend_configured":
-            resend_configured(),
+        "mailroom_configured":
+            mailroom_configured(),
     }
 
 

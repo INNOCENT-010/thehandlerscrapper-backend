@@ -11,6 +11,12 @@ type School = {
   id: string
   school_name: string
   email: string | null
+  emails: Array<{
+    id: string
+    email: string
+    label: string
+    opted_out: boolean
+  }>
   phone: string | null
   address: string | null
   state: string | null
@@ -65,6 +71,21 @@ function formatStatus(status: string) {
   return status.replaceAll('_', ' ')
 }
 
+function normalizeNigerianPhone(value: string | null) {
+  if (!value) return null
+  let digits = value.replace(/\D/g, '')
+  if (digits.startsWith('00')) digits = digits.slice(2)
+  if (digits.startsWith('0')) digits = `234${digits.slice(1)}`
+  if (!digits.startsWith('234') && digits.length === 10) digits = `234${digits}`
+  return digits.length >= 10 && digits.length <= 15 ? digits : null
+}
+
+function phoneLinks(value: string | null) {
+  const digits = normalizeNigerianPhone(value)
+  if (!digits) return null
+  return { call: `tel:+${digits}`, whatsapp: `https://wa.me/${digits}` }
+}
+
 function statusClasses(status: string) {
   switch (status) {
     case 'CUSTOMER':
@@ -90,6 +111,7 @@ function statusClasses(status: string) {
 function broadcastStatusClasses(status: string) {
   switch (status) {
     case 'SENT':
+    case 'SUBMITTED':
       return 'bg-emerald-50 text-emerald-700'
     case 'SENDING':
       return 'bg-blue-50 text-blue-700'
@@ -281,6 +303,8 @@ export default function DistributionPage() {
 
   const [selected, setSelected] =
     useState<Set<string>>(new Set())
+  const [selectedEmails, setSelectedEmails] =
+    useState<Record<string, string>>({})
 
   const [subject, setSubject] = useState('')
   const [senderName, setSenderName] =
@@ -428,15 +452,22 @@ export default function DistributionPage() {
     (school) => selected.has(school.id)
   )
 
+  const emailEligibleSchools = audience.schools.filter((school) =>
+    school.emails.some((email) => !email.opted_out)
+  )
+
   const allSelected =
-    audience.schools.length > 0 &&
-    audience.schools.every((school) =>
+    emailEligibleSchools.length > 0 &&
+    emailEligibleSchools.every((school) =>
       selected.has(school.id)
     )
 
   const selectedEmailCount =
     selectedSchools.filter(
-      (school) => Boolean(school.email)
+      (school) => Boolean(
+        selectedEmails[school.id] ||
+        school.emails.find((email) => !email.opted_out)?.email
+      )
     ).length
 
   const selectedLeadCount =
@@ -445,6 +476,7 @@ export default function DistributionPage() {
     ).length
 
   function toggleSchool(id: string) {
+    const school = audience.schools.find((item) => item.id === id)
     setSelected((current) => {
       const next = new Set(current)
 
@@ -452,6 +484,10 @@ export default function DistributionPage() {
         next.delete(id)
       } else {
         next.add(id)
+        const first = school?.emails.find((email) => !email.opted_out)
+        if (first && !selectedEmails[id]) {
+          setSelectedEmails((emails) => ({ ...emails, [id]: first.email }))
+        }
       }
 
       return next
@@ -462,9 +498,17 @@ export default function DistributionPage() {
     setSelected((current) => {
       if (allSelected) return new Set()
 
-      return new Set(
-        audience.schools.map((school) => school.id)
+      const selectable = audience.schools.filter((school) =>
+        school.emails.some((email) => !email.opted_out)
       )
+      setSelectedEmails((emails) => {
+        const next = { ...emails }
+        for (const school of selectable) {
+          next[school.id] ||= school.emails.find((email) => !email.opted_out)!.email
+        }
+        return next
+      })
+      return new Set(selectable.map((school) => school.id))
     })
   }
 
@@ -479,6 +523,7 @@ export default function DistributionPage() {
     setHasPhone(false)
     setFreshOnly(false)
     setSelected(new Set())
+    setSelectedEmails({})
   }
 
   async function loadHistory() {
@@ -544,7 +589,17 @@ export default function DistributionPage() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            school_ids: [...selected],
+            recipients: selectedSchools
+              .map((school) => ({
+                school_id: school.id,
+                email:
+                  selectedEmails[school.id] ||
+                  school.emails.find((email) => !email.opted_out)?.email,
+              }))
+              .filter(
+                (recipient): recipient is { school_id: string; email: string } =>
+                  Boolean(recipient.email)
+              ),
             subject: subject.trim(),
             body_html: body,
             sender_name:
@@ -566,6 +621,7 @@ export default function DistributionPage() {
       )
 
       setSelected(new Set())
+      setSelectedEmails({})
 
       await loadHistory()
 
@@ -614,41 +670,40 @@ export default function DistributionPage() {
   )
 
   return (
-    <main className="min-h-screen bg-[#f6f7f9] text-slate-950">
+    <main className="min-h-screen bg-[#f4ecd9] text-[#11100d]">
       <div className="mx-auto max-w-[1680px] px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
 
         {/* TOP HEADER */}
 
-        <header className="mb-6">
+        <header className="mb-6 overflow-hidden rounded-[28px] bg-[#11100d] px-6 py-7 text-white shadow-[0_18px_50px_rgba(17,16,13,0.16)] sm:px-8">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
 
             <div>
               <div className="mb-3 flex items-center gap-2">
-                <span className="inline-flex items-center rounded-full bg-slate-950 px-2.5 py-1 text-[9px] font-bold tracking-[0.18em] text-white">
+                <span className="inline-flex items-center rounded-full bg-[#ffe500] px-2.5 py-1 text-[9px] font-black tracking-[0.18em] text-black">
                   THEHANDLER
                 </span>
 
-                <span className="text-xs text-slate-400">
-                  / Distribution
+                <span className="text-xs text-white/45">
+                  / Outreach desk
                 </span>
               </div>
 
               <h1 className="text-[32px] font-semibold tracking-[-0.045em] sm:text-[40px]">
-                Distribution
+                Broadcast with context
               </h1>
 
-              <p className="mt-2 max-w-xl text-sm leading-6 text-slate-500">
-                Find the right schools, build a targeted
-                audience, and send professional campaigns
-                without leaving your workspace.
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-white/60">
+                Choose the exact school email, call immediately, open WhatsApp,
+                or hand a consent-safe campaign to your self-hosted mail engine.
               </p>
             </div>
 
             <div className="flex items-center gap-2">
-              <div className="hidden rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 shadow-sm sm:flex sm:items-center sm:gap-2">
-                <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                <span className="text-xs font-medium text-slate-600">
-                  Distribution ready
+              <div className="hidden rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 sm:flex sm:items-center sm:gap-2">
+                <span className="h-2 w-2 rounded-full bg-[#ffe500]" />
+                <span className="text-xs font-medium text-white/70">
+                  Mailroom connected
                 </span>
               </div>
 
@@ -657,7 +712,7 @@ export default function DistributionPage() {
                   await loadHistory()
                   setTab('history')
                 }}
-                className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold shadow-sm transition hover:bg-slate-50"
+                className="rounded-xl bg-[#ffe500] px-4 py-2.5 text-xs font-black text-black transition hover:bg-[#ffed4d]"
               >
                 View history
               </button>
@@ -668,13 +723,13 @@ export default function DistributionPage() {
         {/* WORKFLOW NAV */}
 
         <div className="mb-5 overflow-x-auto">
-          <div className="flex min-w-max items-center gap-1 rounded-2xl border border-slate-200 bg-white p-1.5 shadow-sm">
+          <div className="flex min-w-max items-center gap-1 rounded-2xl border border-[#dfd2b5] bg-[#fffaf0] p-1.5 shadow-sm">
 
             <button
               onClick={() => setTab('audience')}
               className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold transition ${
                 tab === 'audience'
-                  ? 'bg-slate-950 text-white shadow-sm'
+                  ? 'bg-[#ffe500] text-black shadow-sm'
                   : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
               }`}
             >
@@ -701,7 +756,7 @@ export default function DistributionPage() {
               onClick={() => setTab('composer')}
               className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold transition ${
                 tab === 'composer'
-                  ? 'bg-slate-950 text-white shadow-sm'
+                  ? 'bg-[#ffe500] text-black shadow-sm'
                   : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
               }`}
             >
@@ -720,7 +775,7 @@ export default function DistributionPage() {
               }}
               className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold transition ${
                 tab === 'history'
-                  ? 'bg-slate-950 text-white shadow-sm'
+                  ? 'bg-[#ffe500] text-black shadow-sm'
                   : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
               }`}
             >
@@ -1220,10 +1275,11 @@ export default function DistributionPage() {
                             <input
                               type="checkbox"
                               checked={selected.has(school.id)}
+                              disabled={!school.emails.some((email) => !email.opted_out)}
                               onChange={() =>
                                 toggleSchool(school.id)
                               }
-                              className="h-4 w-4 rounded border-slate-300 accent-slate-950"
+                              className="h-4 w-4 rounded border-slate-300 accent-amber-500 disabled:cursor-not-allowed disabled:opacity-30"
                             />
                           </td>
 
@@ -1250,38 +1306,68 @@ export default function DistributionPage() {
                           </td>
 
                           <td className="px-3 py-4">
-                            {school.email ? (
-                              <div className="flex items-start gap-2">
-                                <span className="mt-0.5 text-slate-300">
-                                  <Icon name="mail" size={13} />
-                                </span>
+                            <div className="min-w-[260px] space-y-2.5">
+                              {school.emails.some((email) => !email.opted_out) ? (
+                                <label className="block">
+                                  <span className="mb-1 block text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400">
+                                    Send email to
+                                  </span>
+                                  <select
+                                    value={
+                                      selectedEmails[school.id] ||
+                                      school.emails.find((email) => !email.opted_out)?.email ||
+                                      ''
+                                    }
+                                    onChange={(event) =>
+                                      setSelectedEmails((emails) => ({
+                                        ...emails,
+                                        [school.id]: event.target.value,
+                                      }))
+                                    }
+                                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-800 outline-none transition focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
+                                  >
+                                    {school.emails.map((contact) => (
+                                      <option
+                                        key={contact.id}
+                                        value={contact.email}
+                                        disabled={contact.opted_out}
+                                      >
+                                        {contact.email} · {contact.opted_out ? 'Opted out' : contact.label}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </label>
+                              ) : (
+                                <div className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-400">
+                                  No eligible email
+                                </div>
+                              )}
 
+                              {school.phone && phoneLinks(school.phone) && (
                                 <div>
-                                  <div className="max-w-[240px] truncate text-xs font-medium text-slate-700">
-                                    {school.email}
-                                  </div>
-
-                                  {school.phone && (
-                                    <div className="mt-1 flex items-center gap-1 text-[10px] text-slate-400">
-                                      <Icon name="phone" size={10} />
-                                      {school.phone}
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            ) : (
-                              <div>
-                                <div className="text-xs text-slate-400">
-                                  No email
-                                </div>
-
-                                {school.phone && (
-                                  <div className="mt-1 text-[10px] text-slate-500">
+                                  <div className="mb-1 flex items-center gap-1 text-[11px] font-semibold text-slate-600">
+                                    <Icon name="phone" size={11} />
                                     {school.phone}
                                   </div>
-                                )}
-                              </div>
-                            )}
+                                  <div className="flex gap-1.5">
+                                    <a
+                                      href={phoneLinks(school.phone)!.call}
+                                      className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[10px] font-bold text-slate-700 hover:border-slate-400"
+                                    >
+                                      Call
+                                    </a>
+                                    <a
+                                      href={phoneLinks(school.phone)!.whatsapp}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="rounded-lg bg-emerald-600 px-2.5 py-1.5 text-[10px] font-bold text-white hover:bg-emerald-700"
+                                    >
+                                      WhatsApp
+                                    </a>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
                           </td>
 
                           <td className="px-3 py-4">
@@ -1707,7 +1793,7 @@ export default function DistributionPage() {
 
                   <div className="mt-4 flex items-center gap-2 text-[9px] font-medium text-slate-300">
                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                    Resend infrastructure
+                    Self-hosted Mailroom
                   </div>
                 </section>
 
@@ -1797,7 +1883,7 @@ export default function DistributionPage() {
                   ),
                 },
                 {
-                  label: 'Sent',
+                  label: 'Submitted',
                   value: deliveryRate,
                 },
                 {
@@ -1861,7 +1947,7 @@ export default function DistributionPage() {
                       </th>
 
                       <th className="px-3 py-3.5">
-                        Delivered
+                        Submitted
                       </th>
 
                       <th className="px-3 py-3.5">
@@ -1918,7 +2004,7 @@ export default function DistributionPage() {
                                   campaign.recipient_count) *
                                   100
                               )}
-                              % sent
+                              % submitted
                             </div>
                           )}
                         </td>

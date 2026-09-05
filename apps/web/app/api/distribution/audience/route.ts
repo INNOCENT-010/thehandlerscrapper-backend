@@ -65,12 +65,6 @@ export async function GET(request: NextRequest) {
       query = query.eq('is_lead', true)
     }
 
-    if (hasEmail) {
-      query = query
-        .not('email', 'is', null)
-        .neq('email', '')
-    }
-
     if (hasPhone) {
       query = query
         .not('phone', 'is', null)
@@ -102,6 +96,45 @@ export async function GET(request: NextRequest) {
     }
 
     const schools = data || []
+
+    const schoolIds = schools.map((school) => school.id)
+    const contactResult = schoolIds.length
+      ? await db
+          .from('school_contacts')
+          .select('id,school_id,full_name,role,email,contact_type,opted_out')
+          .in('school_id', schoolIds)
+          .not('email', 'is', null)
+          .neq('email', '')
+      : { data: [], error: null }
+
+    if (contactResult.error) {
+      return NextResponse.json(
+        { error: contactResult.error.message },
+        { status: 500 }
+      )
+    }
+
+    const emailsBySchool = new Map<string, Array<{
+      id: string
+      email: string
+      label: string
+      opted_out: boolean
+    }>>()
+
+    for (const contact of contactResult.data || []) {
+      const email = contact.email?.trim().toLowerCase()
+      if (!email) continue
+      const current = emailsBySchool.get(contact.school_id) || []
+      if (!current.some((item) => item.email === email)) {
+        current.push({
+          id: contact.id,
+          email,
+          label: contact.full_name || contact.role || contact.contact_type || 'School contact',
+          opted_out: Boolean(contact.opted_out),
+        })
+      }
+      emailsBySchool.set(contact.school_id, current)
+    }
 
     const locationIds = Array.from(
       new Set(
@@ -168,6 +201,18 @@ export async function GET(request: NextRequest) {
         id: school.id,
         school_name: school.school_name,
         email: school.email,
+
+        emails: (() => {
+          const contacts = emailsBySchool.get(school.id) || []
+          const primary = school.email?.trim().toLowerCase()
+          if (primary && !contacts.some((item) => item.email === primary)) {
+            return [
+              { id: `school:${school.id}`, email: primary, label: 'Primary school email', opted_out: false },
+              ...contacts,
+            ]
+          }
+          return contacts
+        })(),
         phone: school.phone,
         address: school.address,
 
@@ -187,17 +232,23 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    const filtered = freshOnly
+    let filtered = freshOnly
       ? result.filter((school) => school.is_fresh)
       : result
+
+    if (hasEmail) {
+      filtered = filtered.filter((school) =>
+        school.emails.some((email) => !email.opted_out)
+      )
+    }
 
     return NextResponse.json({
       schools: filtered,
 
       total: filtered.length,
 
-      email_count: filtered.filter(
-        (school) => !!school.email?.trim()
+      email_count: filtered.filter((school) =>
+        school.emails.some((email) => !email.opted_out)
       ).length,
 
       phone_count: filtered.filter(
