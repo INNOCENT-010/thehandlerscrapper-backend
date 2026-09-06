@@ -306,12 +306,14 @@ export default function DistributionPage() {
   const [selectedEmails, setSelectedEmails] =
     useState<Record<string, string>>({})
 
-  const [subject, setSubject] = useState('')
+  const [subject, setSubject] = useState(
+    'A better way to manage school records'
+  )
   const [senderName, setSenderName] =
     useState('TheHandler')
 
   const [body, setBody] = useState(
-    '<h2>Hello {{school_name}},</h2><p>We would like to introduce TheHandler to your school.</p><p>Regards,<br>TheHandler Team</p>'
+    '<p>Dear {{school_name}} Management,</p><p>We would like to introduce <strong>TheHandler</strong>, a school operations and records platform designed around how schools actually work.</p><p>Many school management systems require staff to complete their work first and then upload or re-enter records into another system. Schools without such systems often depend on calls, files, spreadsheets, and individual staff members to find information when questions arise.</p><p>TheHandler takes a different approach.</p><p>Instead of making record-keeping an additional task, the work itself creates the record. As staff carry out their normal responsibilities, TheHandler automatically builds a structured institutional timeline—creating a reliable history of activities, payments, attendance, student records, and other operations.</p><p>This makes records easier to retrieve, trace, audit, and use for decision-making without creating unnecessary work for staff.</p><p>Our team is delighted to introduce TheHandler to your management team and demonstrate how it could work within {{school_name}}.</p><p>Would you be available for a brief 20-minute demonstration this week?</p><p>We look forward to hearing from you.</p><p>Kind regards,<br><strong>INNOCENT AMAECHI</strong><br>TheHandler<br>WhatsApp/Call: <a href="tel:+2348104945035">+234 810 494 5035</a><br><a href="https://thehandler.xyz">thehandler.xyz</a></p>'
   )
 
   const [message, setMessage] = useState('')
