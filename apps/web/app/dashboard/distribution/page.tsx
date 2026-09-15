@@ -312,6 +312,13 @@ export default function DistributionPage() {
   const [senderName, setSenderName] =
     useState('TheHandler')
 
+  // Self-hosted "Mailroom" isn't live yet, so broadcasts default to
+  // Resend. Once Mailroom is ready, flip DEFAULT_DELIVERY_METHOD below
+  // (or just let people pick it from the UI toggle).
+  const [deliveryMethod, setDeliveryMethod] = useState<
+    'resend' | 'internal'
+  >('resend')
+
   const [body, setBody] = useState(
     '<p>Dear {{school_name}} Management,</p><p>We would like to introduce <strong>TheHandler</strong>, a school operations and records platform designed around how schools actually work.</p><p>Many school management systems require staff to complete their work first and then upload or re-enter records into another system. Schools without such systems often depend on calls, files, spreadsheets, and individual staff members to find information when questions arise.</p><p>TheHandler takes a different approach.</p><p>Instead of making record-keeping an additional task, the work itself creates the record. As staff carry out their normal responsibilities, TheHandler automatically builds a structured institutional timeline—creating a reliable history of activities, payments, attendance, student records, and other operations.</p><p>This makes records easier to retrieve, trace, audit, and use for decision-making without creating unnecessary work for staff.</p><p>Our team is delighted to introduce TheHandler to your management team and demonstrate how it could work within {{school_name}}.</p><p>Would you be available for a brief 20-minute demonstration this week?</p><p>We look forward to hearing from you.</p><p>Kind regards,<br><strong>INNOCENT AMAECHI</strong><br>TheHandler<br>WhatsApp/Call: <a href="tel:+2348104945035">+234 810 494 5035</a><br><a href="https://thehandler.xyz">thehandler.xyz</a></p>'
   )
@@ -574,7 +581,9 @@ export default function DistributionPage() {
     }
 
     const confirmed = window.confirm(
-      `Queue this broadcast for ${selected.size} selected schools?`
+      `Queue this broadcast for ${selected.size} selected schools via ${
+        deliveryMethod === 'resend' ? 'Resend' : 'Self-hosted Mailroom'
+      }?`
     )
 
     if (!confirmed) return
@@ -606,6 +615,7 @@ export default function DistributionPage() {
             body_html: body,
             sender_name:
               senderName.trim() || 'TheHandler',
+            delivery_method: deliveryMethod,
           }),
         }
       )
@@ -619,7 +629,9 @@ export default function DistributionPage() {
       }
 
       setMessage(
-        `Broadcast queued for ${data.recipient_count} recipients.`
+        `Broadcast queued for ${data.recipient_count} recipients via ${
+          deliveryMethod === 'resend' ? 'Resend' : 'Mailroom'
+        }.`
       )
 
       setSelected(new Set())
@@ -697,15 +709,24 @@ export default function DistributionPage() {
 
               <p className="mt-2 max-w-2xl text-sm leading-6 text-white/60">
                 Choose the exact school email, call immediately, open WhatsApp,
-                or hand a consent-safe campaign to your self-hosted mail engine.
+                or hand a consent-safe campaign to Resend while your self-hosted
+                mail engine finishes coming online.
               </p>
             </div>
 
             <div className="flex items-center gap-2">
               <div className="hidden rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 sm:flex sm:items-center sm:gap-2">
-                <span className="h-2 w-2 rounded-full bg-[#ffe500]" />
+                <span
+                  className={`h-2 w-2 rounded-full ${
+                    deliveryMethod === 'resend'
+                      ? 'bg-[#ffe500]'
+                      : 'bg-white/30'
+                  }`}
+                />
                 <span className="text-xs font-medium text-white/70">
-                  Mailroom connected
+                  {deliveryMethod === 'resend'
+                    ? 'Resend connected'
+                    : 'Mailroom not ready'}
                 </span>
               </div>
 
@@ -1773,7 +1794,7 @@ export default function DistributionPage() {
                   )}
                 </section>
 
-                {/* DELIVERY INFO */}
+                {/* DELIVERY METHOD */}
 
                 <section className="rounded-2xl bg-slate-950 p-5 text-white shadow-sm">
 
@@ -1789,13 +1810,77 @@ export default function DistributionPage() {
 
                   <p className="mt-3 text-[10px] leading-5 text-slate-400">
                     Your campaign is queued first and then delivered by
-                    the configured email infrastructure. Each school
-                    receives its personalized version of the message.
+                    the provider you pick below. Each school receives its
+                    personalized version of the message.
                   </p>
 
+                  <div className="mt-4 space-y-2">
+
+                    <label
+                      className={`flex cursor-pointer items-start gap-3 rounded-xl border px-3.5 py-3 transition ${
+                        deliveryMethod === 'resend'
+                          ? 'border-[#ffe500] bg-white/10'
+                          : 'border-white/10 bg-white/5 hover:bg-white/10'
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="delivery_method"
+                        value="resend"
+                        checked={deliveryMethod === 'resend'}
+                        onChange={() => setDeliveryMethod('resend')}
+                        className="mt-0.5 h-3.5 w-3.5 accent-[#ffe500]"
+                      />
+
+                      <div>
+                        <div className="text-xs font-semibold">
+                          Resend
+                        </div>
+                        <div className="mt-0.5 text-[10px] leading-4 text-slate-400">
+                          Live now — use this until Mailroom is ready.
+                        </div>
+                      </div>
+                    </label>
+
+                    <label
+                      className={`flex cursor-not-allowed items-start gap-3 rounded-xl border px-3.5 py-3 opacity-50 ${
+                        deliveryMethod === 'internal'
+                          ? 'border-[#ffe500] bg-white/10'
+                          : 'border-white/10 bg-white/5'
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="delivery_method"
+                        value="internal"
+                        checked={deliveryMethod === 'internal'}
+                        disabled
+                        readOnly
+                        className="mt-0.5 h-3.5 w-3.5 accent-[#ffe500]"
+                      />
+
+                      <div>
+                        <div className="text-xs font-semibold">
+                          Self-hosted Mailroom
+                        </div>
+                        <div className="mt-0.5 text-[10px] leading-4 text-slate-400">
+                          Coming soon — infrastructure isn&apos;t live yet.
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+
                   <div className="mt-4 flex items-center gap-2 text-[9px] font-medium text-slate-300">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                    Self-hosted Mailroom
+                    <span
+                      className={`h-1.5 w-1.5 rounded-full ${
+                        deliveryMethod === 'resend'
+                          ? 'bg-emerald-400'
+                          : 'bg-slate-500'
+                      }`}
+                    />
+                    {deliveryMethod === 'resend'
+                      ? 'Sending through Resend'
+                      : 'Mailroom offline'}
                   </div>
                 </section>
 
@@ -1813,7 +1898,11 @@ export default function DistributionPage() {
                   <span>
                     {sending
                       ? 'Queueing campaign…'
-                      : `Send to ${selectedEmailCount.toLocaleString()} recipients`}
+                      : `Send to ${selectedEmailCount.toLocaleString()} recipients via ${
+                          deliveryMethod === 'resend'
+                            ? 'Resend'
+                            : 'Mailroom'
+                        }`}
                   </span>
 
                   {!sending && (
