@@ -307,7 +307,7 @@ export default function DistributionPage() {
     useState<Record<string, string>>({})
 
   const [subject, setSubject] = useState(
-    'A better way to manage school records'
+    '{{school_name}} — 15 minutes to see this?'
   )
   const [senderName, setSenderName] =
     useState('TheHandler')
@@ -320,7 +320,71 @@ export default function DistributionPage() {
   >('resend')
 
   const [body, setBody] = useState(
-    '<p>Dear {{school_name}} Management,</p><p>We would like to introduce <strong>TheHandler</strong>, a school operations and records platform designed around how schools actually work.</p><p>Many school management systems require staff to complete their work first and then upload or re-enter records into another system. Schools without such systems often depend on calls, files, spreadsheets, and individual staff members to find information when questions arise.</p><p>TheHandler takes a different approach.</p><p>Instead of making record-keeping an additional task, the work itself creates the record. As staff carry out their normal responsibilities, TheHandler automatically builds a structured institutional timeline—creating a reliable history of activities, payments, attendance, student records, and other operations.</p><p>This makes records easier to retrieve, trace, audit, and use for decision-making without creating unnecessary work for staff.</p><p>Our team is delighted to introduce TheHandler to your management team and demonstrate how it could work within {{school_name}}.</p><p>Would you be available for a brief 20-minute demonstration this week?</p><p>We look forward to hearing from you.</p><p>Kind regards,<br><strong>INNOCENT AMAECHI</strong><br>TheHandler<br>WhatsApp/Call: <a href="tel:+2348104945035">+234 810 494 5035</a><br><a href="https://thehandler.xyz">thehandler.xyz</a></p>'
+    `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{school_name}} — 15 minutes to see this?</title>
+</head>
+
+<body style="margin:0; padding:0; background-color:#ffffff; font-family:Arial, Helvetica, sans-serif; color:#222222;">
+
+  <div style="max-width:620px; margin:0 auto; padding:40px 24px;">
+
+    <p style="font-size:15px; line-height:1.7; margin:0 0 22px 0;">
+      Dear {{school_name}} Management,
+    </p>
+
+    <p style="font-size:15px; line-height:1.7; margin:0 0 22px 0;">
+      Quick question: when a parent asks about a payment, or management needs a student's attendance history, how quickly can the right record be pulled up?
+    </p>
+
+    <p style="font-size:15px; line-height:1.7; margin:0 0 22px 0;">
+      Often, it means calling around, checking files, spreadsheets, or relying on whoever has the information.
+    </p>
+
+    <p style="font-size:15px; line-height:1.7; margin:0 0 22px 0;">
+      <strong>TheHandler</strong> takes a different approach. It turns your staff's everyday school operations into a structured, searchable record automatically, so payments, attendance, student history, reports, and other activities don't have to be re-entered or hunted down later.
+    </p>
+
+    <p style="font-size:15px; line-height:1.7; margin:0 0 22px 0;">
+      We are currently inviting a limited number of schools in Lagos to
+      <strong>participate in the rollout at no cost</strong>.
+      Participating schools will be able to use TheHandler while we work closely with them to refine the system around real school operations.
+    </p>
+
+    <p style="font-size:15px; line-height:1.7; margin:0 0 22px 0;">
+      I'd like to show your management team how it works in a
+      <strong>15-minute live demonstration</strong>.
+    </p>
+
+    <p style="font-size:15px; line-height:1.7; margin:0 0 22px 0;">
+      Would <strong>Wednesday at 2pm or Thursday at 11am any week</strong> work for you?
+    </p>
+
+    <p style="font-size:15px; line-height:1.7; margin:0 0 28px 0;">
+      If it's not the right time, simply reply <strong>"not now"</strong>
+      and I won't follow up.
+    </p>
+
+    <p style="font-size:15px; line-height:1.7; margin:0;">
+      Kind regards,<br>
+      <strong>INNOCENT AMAECHI</strong><br>
+      TheHandler<br>
+      WhatsApp/Call:
+      <a href="tel:+2348104945035" style="color:#222222; text-decoration:none;">
+        +234 810 494 5035
+      </a><br>
+      <a href="https://thehandler.xyz/" style="color:#222222; text-decoration:none;">
+        thehandler.xyz
+      </a>
+    </p>
+
+  </div>
+
+</body>
+</html>`
   )
 
   const [message, setMessage] = useState('')
