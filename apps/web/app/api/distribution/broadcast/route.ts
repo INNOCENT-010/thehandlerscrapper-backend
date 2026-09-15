@@ -243,13 +243,16 @@ export async function POST(request: NextRequest) {
 
     let sentCount = 0
     let failedCount = 0
-    const statusUpdates: Array<{ school_id: string; status: string; error?: string }> = []
+    const statusUpdates: Array<{ school_id: string; status: string }> = []
 
     for (const batch of chunk(eligible, RESEND_BATCH_SIZE)) {
       const emails = batch.map((school) => ({
         from: `${senderName} <${fromAddress}>`,
         to: school.selected_email,
-        subject,
+        subject: personalize(subject, {
+          school_name: school.school_name || 'School',
+          status: school.status || 'NEW',
+        }),
         html: personalize(bodyHtml, {
           school_name: school.school_name || 'School',
           status: school.status || 'NEW',
@@ -260,12 +263,12 @@ export async function POST(request: NextRequest) {
 
       if (sendError) {
         failedCount += batch.length
+        console.error(
+          `Resend batch failed for broadcast ${broadcast.id}:`,
+          sendError.message
+        )
         for (const school of batch) {
-          statusUpdates.push({
-            school_id: school.id,
-            status: 'FAILED',
-            error: sendError.message,
-          })
+          statusUpdates.push({ school_id: school.id, status: 'FAILED' })
         }
         continue
       }
@@ -287,10 +290,7 @@ export async function POST(request: NextRequest) {
       statusUpdates.map((update) =>
         db
           .from('broadcast_recipients')
-          .update({
-            status: update.status,
-            ...(update.error ? { error: update.error } : {}),
-          })
+          .update({ status: update.status })
           .eq('broadcast_id', broadcast.id)
           .eq('school_id', update.school_id)
       )

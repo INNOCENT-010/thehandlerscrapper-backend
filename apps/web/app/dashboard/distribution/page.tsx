@@ -666,6 +666,17 @@ export default function DistributionPage() {
       freshOnly,
     ].filter(Boolean).length
 
+  const previewSubject = subject
+    .replaceAll(
+      '{{school_name}}',
+      selectedSchools[0]?.school_name ||
+        'School Name'
+    )
+    .replaceAll(
+      '{{status}}',
+      selectedSchools[0]?.status || 'NEW'
+    )
+
   const previewBody = body
     .replaceAll(
       '{{school_name}}',
@@ -1715,7 +1726,7 @@ export default function DistributionPage() {
                             </div>
 
                             <div className="truncate text-[11px] font-semibold text-slate-900">
-                              {subject ||
+                              {previewSubject ||
                                 'Your campaign subject'}
                             </div>
                           </div>
